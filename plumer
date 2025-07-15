@@ -33,6 +33,9 @@ Usage:
   final snakeName = _toSnakeCase(pathParts.last);
 
   switch (command) {
+    case 'init':
+      await _initProject();
+      break;
     case 'make:controller':
       await _createController(folderPath, classBaseName, snakeName);
       break;
@@ -49,6 +52,131 @@ Usage:
       print('\x1B[31m❌ Unknown command: $command\x1B[0m');
   }
 }
+
+Future<void> _initProject() async {
+  final pubspec = File('pubspec.yaml');
+  if (!pubspec.existsSync()) {
+    print('\x1B[31m❌ Error: Not a Flutter project. pubspec.yaml not found.\x1B[0m');
+    exit(1);
+  }
+
+  print('\x1B[36m🚀 Initializing Flutter project with GetX and Dio...\x1B[0m');
+
+  // Install GetX and Dio
+  await Process.run('dart', ['pub', 'add', 'get']);
+  await Process.run('dart', ['pub', 'add', 'dio']);
+
+  print('\x1B[32m✅ Installed GetX and Dio.\x1B[0m');
+
+  // Create folder structure
+  final dirs = [
+    'lib/config',
+    'lib/controllers',
+    'lib/bindings',
+    'lib/models',
+    'lib/screens',
+    'lib/widgets',
+  ];
+  for (var dir in dirs) {
+    await Directory(dir).create(recursive: true);
+  }
+  print('\x1B[32m✅ Created recommended folder structure.\x1B[0m');
+
+  // Create app_colors.dart
+  final appColorsContent = '''
+import 'package:flutter/material.dart';
+
+class AppColors {
+  static const Color primary = Color(0xFF340404); // Deep red
+  static const Color accent = Color(0xFFF5B300); // Vibrant yellow
+  static const Color appBarColor = Colors.white;
+  static const Color appBarBackground = primary;
+}
+''';
+  await File('lib/config/app_colors.dart').writeAsString(appColorsContent);
+  print('\x1B[32m✅ Created lib/config/app_colors.dart\x1B[0m');
+
+  // Create app_routes.dart
+  final appRoutesContent = '''
+import 'package:get/get.dart';
+
+class AppRoutes {
+  static final routes = <GetPage>[];
+}
+''';
+  await File('lib/config/app_routes.dart').writeAsString(appRoutesContent);
+  print('\x1B[32m✅ Created lib/config/app_routes.dart\x1B[0m');
+
+  // Create MainPage
+  final mainPageContent = '''
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../config/app_colors.dart';
+
+class MainPage extends StatelessWidget {
+  const MainPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Welcome to Plumer'),
+        backgroundColor: AppColors.appBarBackground,
+        foregroundColor: AppColors.appBarColor,
+      ),
+      body: const Center(
+        child: Text(
+          'Plumer initialized your Flutter project!',
+          style: TextStyle(fontSize: 18),
+        ),
+      ),
+    );
+  }
+}
+''';
+  await File('lib/screens/main_page.dart').writeAsString(mainPageContent);
+  print('\x1B[32m✅ Created lib/screens/main_page.dart\x1B[0m');
+
+  // Replace main.dart
+  final mainDartContent = '''
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'config/app_colors.dart';
+import 'config/app_routes.dart';
+import 'screens/main_page.dart';
+
+void main() {
+  runApp(const PlumerApp());
+}
+
+class PlumerApp extends StatelessWidget {
+  const PlumerApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Plumer App',
+      theme: ThemeData(
+        primaryColor: AppColors.primary,
+        scaffoldBackgroundColor: Colors.white,
+        fontFamily: 'Roboto',
+      ),
+      initialRoute: '/',
+      getPages: [
+        GetPage(name: '/', page: () => const MainPage()),
+        ...AppRoutes.routes,
+      ],
+    );
+  }
+}
+''';
+  await File('lib/main.dart').writeAsString(mainDartContent);
+  print('\x1B[32m✅ Overwrote lib/main.dart with Plumer starter template.\x1B[0m');
+
+  print('\x1B[36m🎉 Plumer initialization complete! Run your app with:\n   flutter run\x1B[0m');
+}
+
 
 Future<bool> _isFlutterProject() async {
   final pubspec = File('pubspec.yaml');
