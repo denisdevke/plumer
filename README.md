@@ -195,7 +195,7 @@ Open an issue or submit a PR to help make Plumer the **ultimate Flutter producti
 
 If Plumer saves you hours, please consider [buying me a coffee](https://www.buymeacoffee.com/yourusername) to support continued maintenance and new features.
 
-<a href="https://www.buymeacoffee.com/yourusername" target="_blank">
+<a href="https://coff.ee/denisdevke" target="_blank">
   <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" width="200" alt="Buy Me A Coffee">
 </a>
 
