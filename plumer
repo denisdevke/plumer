@@ -1,0 +1,232 @@
+#!/usr/bin/env dart
+
+import 'dart:io';
+
+Future<void> main(List<String> arguments) async {
+  print('\x1B[36m🪶 Plumer CLI - Flutter scaffolding made easy\x1B[0m');
+
+  if (!await _isFlutterProject()) {
+    print('\x1B[31m❌ This is not a Flutter project. Exiting.\x1B[0m');
+    exit(1);
+  }
+
+  final packageName = await _getPackageName();
+
+  if (arguments.length < 2) {
+    print('''
+Usage:
+  plumer make:controller Booking
+  plumer make:controller Booking/Flight
+  plumer make:binding Booking/Flight
+  plumer make:screen Booking/Flight
+  plumer make:page Booking/Flight
+''');
+    exit(0);
+  }
+
+  final command = arguments[0];
+  final rawPath = arguments[1];
+
+  final pathParts = rawPath.split('/');
+  final classBaseName = _toPascalCase(pathParts.last);
+  final folderPath = pathParts.length > 1 ? pathParts.sublist(0, pathParts.length - 1).map(_toSnakeCase).join('/') : '';
+  final snakeName = _toSnakeCase(pathParts.last);
+
+  switch (command) {
+    case 'make:controller':
+      await _createController(folderPath, classBaseName, snakeName);
+      break;
+    case 'make:binding':
+      await _createBinding(folderPath, classBaseName, snakeName, packageName);
+      break;
+    case 'make:screen':
+      await _createScreen(folderPath, classBaseName, snakeName, packageName);
+      break;
+    case 'make:page':
+      await _makePage(folderPath, classBaseName, snakeName, packageName);
+      break;
+    default:
+      print('\x1B[31m❌ Unknown command: $command\x1B[0m');
+  }
+}
+
+Future<bool> _isFlutterProject() async {
+  final pubspec = File('pubspec.yaml');
+  if (!pubspec.existsSync()) return false;
+  final content = await pubspec.readAsString();
+  return content.contains('flutter:');
+}
+
+Future<String> _getPackageName() async {
+  final pubspec = File('pubspec.yaml');
+  if (!pubspec.existsSync()) {
+    print('\x1B[31m❌ pubspec.yaml not found. Exiting.\x1B[0m');
+    exit(1);
+  }
+  final content = await pubspec.readAsLines();
+  for (final line in content) {
+    final trimmed = line.trim();
+    if (trimmed.startsWith('name:')) {
+      final name = trimmed.substring(5).trim();
+      if (name.isNotEmpty) return name;
+    }
+  }
+  print('\x1B[31m❌ Could not find project name in pubspec.yaml. Exiting.\x1B[0m');
+  exit(1);
+}
+
+Future<void> _makePage(String folder, String pascal, String snake, String packageName) async {
+  final controllerPath = 'lib/controllers${folder.isNotEmpty ? '/$folder' : ''}/${snake}_controller.dart';
+  final bindingPath = 'lib/bindings${folder.isNotEmpty ? '/$folder' : ''}/${snake}_binding.dart';
+  final screenPath = 'lib/screens${folder.isNotEmpty ? '/$folder' : ''}/${snake}_screen.dart';
+
+  final routeName = "/${folder.isNotEmpty ? folder + '/' : ''}${snake}".replaceAll('_', '');
+  final routeSignature = "GetPage(name: '$routeName',";
+
+  final appRoutesFile = File('lib/config/app_routes.dart');
+  if (!appRoutesFile.existsSync()) {
+    print('\x1B[31m❌ lib/config/app_routes.dart not found. Cannot update routes.\x1B[0m');
+    exit(1);
+  }
+
+  final appRoutesContent = await appRoutesFile.readAsString();
+
+  final conflicts = <String>[];
+  if (File(controllerPath).existsSync()) conflicts.add(controllerPath);
+  if (File(bindingPath).existsSync()) conflicts.add(bindingPath);
+  if (File(screenPath).existsSync()) conflicts.add(screenPath);
+  if (appRoutesContent.contains(routeSignature)) conflicts.add('Route already exists in app_routes.dart');
+
+  if (conflicts.isNotEmpty) {
+    print('\x1B[31m❌ Cannot create page because the following already exist:\x1B[0m');
+    for (final c in conflicts) {
+      print(' - $c');
+    }
+    print('\x1B[31mAborting and reverting changes.\x1B[0m');
+    exit(1);
+  }
+
+  await _createController(folder, pascal, snake);
+  await _createBinding(folder, pascal, snake, packageName);
+  await _createScreen(folder, pascal, snake, packageName);
+  await _updateAppRoutes(folder, pascal, snake, packageName);
+
+  print('\x1B[32m✅ Page created and registered in routes for "$folder/$pascal".\x1B[0m');
+}
+
+Future<void> _createController(String folder, String pascal, String snake) async {
+  final dir = 'lib/controllers${folder.isNotEmpty ? '/$folder' : ''}';
+  final file = File('$dir/${snake}_controller.dart');
+  await file.create(recursive: true);
+  await file.writeAsString('''
+import 'package:get/get.dart';
+
+class ${pascal}Controller extends GetxController {
+
+}
+''');
+  print('\x1B[32m✅ Controller created: ${file.path}\x1B[0m');
+}
+
+Future<void> _createBinding(String folder, String pascal, String snake, String packageName) async {
+  final dir = 'lib/bindings${folder.isNotEmpty ? '/$folder' : ''}';
+  final file = File('$dir/${snake}_binding.dart');
+  await file.create(recursive: true);
+  final importPath = 'package:$packageName/controllers${folder.isNotEmpty ? '/$folder' : ''}/${snake}_controller.dart';
+  await file.writeAsString('''
+import 'package:get/get.dart';
+import '$importPath';
+
+class ${pascal}Binding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<${pascal}Controller>(() => ${pascal}Controller());
+  }
+}
+''');
+  print('\x1B[32m✅ Binding created: ${file.path}\x1B[0m');
+}
+
+Future<void> _createScreen(String folder, String pascal, String snake, String packageName) async {
+  final dir = 'lib/screens${folder.isNotEmpty ? '/$folder' : ''}';
+  final file = File('$dir/${snake}_screen.dart');
+  await file.create(recursive: true);
+  final importPath = 'package:$packageName/controllers${folder.isNotEmpty ? '/$folder' : ''}/${snake}_controller.dart';
+  await file.writeAsString('''
+import 'package:get/get.dart';
+import 'package:flutter/material.dart';
+import 'package:$packageName/config/app_colors.dart';
+import '$importPath';
+
+class ${pascal}Screen extends GetView<${pascal}Controller> {
+  const ${pascal}Screen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('${_splitPascalCase(pascal)}'),
+        backgroundColor: AppColors.appBarBackground,
+        foregroundColor: AppColors.appBarColor,
+      ),
+      body: const Center(
+        child: Text(
+          '${_splitPascalCase(pascal)} Screen',
+          style: TextStyle(color: AppColors.oneWay, fontSize: 24),
+        ),
+      ),
+    );
+  }
+}
+''');
+  print('\x1B[32m✅ Screen created: ${file.path}\x1B[0m');
+}
+
+Future<void> _updateAppRoutes(String folder, String pascal, String snake, String packageName) async {
+  final appRoutesFile = File('lib/config/app_routes.dart');
+  var content = await appRoutesFile.readAsString();
+
+  final importBinding = "import 'package:$packageName/bindings${folder.isNotEmpty ? '/$folder' : ''}/${snake}_binding.dart';";
+  final importScreen = "import 'package:$packageName/screens${folder.isNotEmpty ? '/$folder' : ''}/${snake}_screen.dart';";
+  final routeName = "/${folder.isNotEmpty ? folder + '/' : ''}${snake}".replaceAll('_', '');
+
+  final pageRegistration = "GetPage(name: '$routeName', page: () => const ${pascal}Screen(), binding: ${pascal}Binding()),";
+
+  if (!content.contains(importBinding)) {
+    content = importBinding + '\n' + content;
+  }
+  if (!content.contains(importScreen)) {
+    content = importScreen + '\n' + content;
+  }
+
+  final routesRegex = RegExp(r'static final routes\s*=\s*\[([\s\S]*?)\];');
+  final match = routesRegex.firstMatch(content);
+
+  if (match != null) {
+    final currentRoutes = match.group(1);
+    final updatedRoutes = '$currentRoutes\n    $pageRegistration';
+    content = content.replaceFirst(routesRegex, 'static final routes = [${updatedRoutes}\n  ];');
+    await appRoutesFile.writeAsString(content);
+    print('\x1B[32m✅ Route added to lib/config/app_routes.dart\x1B[0m');
+  } else {
+    print('\x1B[31m❌ Could not locate routes list in app_routes.dart. Please add the route manually.\x1B[0m');
+  }
+}
+
+String _toSnakeCase(String input) {
+  return input.replaceAllMapped(
+      RegExp(r'([a-z0-9])([A-Z])'), (Match m) => '${m[1]}_${m[2]}').toLowerCase();
+}
+
+String _toPascalCase(String input) {
+  return input
+      .split(RegExp(r'[_\-\s]'))
+      .where((part) => part.isNotEmpty)
+      .map((part) => part[0].toUpperCase() + part.substring(1))
+      .join();
+}
+
+String _splitPascalCase(String input) {
+  return input.replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m[1]} ${m[2]}');
+}
+
