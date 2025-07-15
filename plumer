@@ -11,45 +11,41 @@ Future<void> main(List<String> arguments) async {
   }
 
   final packageName = await _getPackageName();
-
-  if (arguments.length < 2) {
-    print('''
-Usage:
-  plumer make:controller Booking
-  plumer make:controller Booking/Flight
-  plumer make:binding Booking/Flight
-  plumer make:screen Booking/Flight
-  plumer make:page Booking/Flight
-''');
-    exit(0);
-  }
-
   final command = arguments[0];
-  final rawPath = arguments[1];
 
-  final pathParts = rawPath.split('/');
-  final classBaseName = _toPascalCase(pathParts.last);
-  final folderPath = pathParts.length > 1 ? pathParts.sublist(0, pathParts.length - 1).map(_toSnakeCase).join('/') : '';
-  final snakeName = _toSnakeCase(pathParts.last);
+  if (command == 'init') {
+    await _initProject();
+  } else {
+    if (arguments.length < 2) {
+      print('\x1B[31m❌ Missing required path argument for "$command".\x1B[0m');
+      print('Example: plumer $command Booking/Flight');
+      exit(1);
+    }
 
-  switch (command) {
-    case 'init':
-      await _initProject();
-      break;
-    case 'make:controller':
-      await _createController(folderPath, classBaseName, snakeName);
-      break;
-    case 'make:binding':
-      await _createBinding(folderPath, classBaseName, snakeName, packageName);
-      break;
-    case 'make:screen':
-      await _createScreen(folderPath, classBaseName, snakeName, packageName);
-      break;
-    case 'make:page':
-      await _makePage(folderPath, classBaseName, snakeName, packageName);
-      break;
-    default:
-      print('\x1B[31m❌ Unknown command: $command\x1B[0m');
+    final rawPath = arguments[1];
+    final pathParts = rawPath.split('/');
+    final classBaseName = _toPascalCase(pathParts.last);
+    final folderPath = pathParts.length > 1
+        ? pathParts.sublist(0, pathParts.length - 1).map(_toSnakeCase).join('/')
+        : '';
+    final snakeName = _toSnakeCase(pathParts.last);
+
+    switch (command) {
+      case 'make:controller':
+        await _createController(folderPath, classBaseName, snakeName);
+        break;
+      case 'make:binding':
+        await _createBinding(folderPath, classBaseName, snakeName, packageName);
+        break;
+      case 'make:screen':
+        await _createScreen(folderPath, classBaseName, snakeName, packageName);
+        break;
+      case 'make:page':
+        await _makePage(folderPath, classBaseName, snakeName, packageName);
+        break;
+      default:
+        print('\x1B[31m❌ Unknown command: $command\x1B[0m');
+    }
   }
 }
 
@@ -300,7 +296,7 @@ class ${pascal}Screen extends GetView<${pascal}Controller> {
       body: const Center(
         child: Text(
           '${_splitPascalCase(pascal)} Screen',
-          style: TextStyle(color: AppColors.oneWay, fontSize: 24),
+          style: TextStyle(color: AppColors.primary, fontSize: 24),
         ),
       ),
     );
@@ -310,34 +306,87 @@ class ${pascal}Screen extends GetView<${pascal}Controller> {
   print('\x1B[32m✅ Screen created: ${file.path}\x1B[0m');
 }
 
-Future<void> _updateAppRoutes(String folder, String pascal, String snake, String packageName) async {
+Future<void> _updateAppRoutes(
+  String folder,
+  String pascal,
+  String snake,
+  String packageName,
+) async {
   final appRoutesFile = File('lib/config/app_routes.dart');
+
+  if (!appRoutesFile.existsSync()) {
+    print('\x1B[31m❌ lib/config/app_routes.dart not found.\x1B[0m');
+    exit(1);
+  }
+
   var content = await appRoutesFile.readAsString();
 
-  final importBinding = "import 'package:$packageName/bindings${folder.isNotEmpty ? '/$folder' : ''}/${snake}_binding.dart';";
-  final importScreen = "import 'package:$packageName/screens${folder.isNotEmpty ? '/$folder' : ''}/${snake}_screen.dart';";
-  final routeName = "/${folder.isNotEmpty ? folder + '/' : ''}${snake}".replaceAll('_', '');
+  final importBinding =
+      "import 'package:$packageName/bindings${folder.isNotEmpty ? '/$folder' : ''}/${snake}_binding.dart';";
+  final importScreen =
+      "import 'package:$packageName/screens${folder.isNotEmpty ? '/$folder' : ''}/${snake}_screen.dart';";
 
-  final pageRegistration = "GetPage(name: '$routeName', page: () => const ${pascal}Screen(), binding: ${pascal}Binding()),";
+  final routeName =
+      "/${folder.isNotEmpty ? folder + '/' : ''}${snake}".replaceAll('_', '');
+  final pageRegistration =
+      "GetPage(name: '$routeName', page: () => const ${pascal}Screen(), binding: ${pascal}Binding()),";
 
+  // Insert imports at top if not present
   if (!content.contains(importBinding)) {
-    content = importBinding + '\n' + content;
-  }
-  if (!content.contains(importScreen)) {
-    content = importScreen + '\n' + content;
+    // Put AFTER the last import OR at top
+    final importRegex = RegExp(r"(import .+;)");
+    final matches = importRegex.allMatches(content).toList();
+    if (matches.isNotEmpty) {
+      final lastImport = matches.last;
+      content = content.replaceRange(
+        lastImport.end,
+        lastImport.end,
+        '\n$importBinding',
+      );
+    } else {
+      content = '$importBinding\n$content';
+    }
   }
 
-  final routesRegex = RegExp(r'static final routes\s*=\s*\[([\s\S]*?)\];');
+  if (!content.contains(importScreen)) {
+    final importRegex = RegExp(r"(import .+;)");
+    final matches = importRegex.allMatches(content).toList();
+    if (matches.isNotEmpty) {
+      final lastImport = matches.last;
+      content = content.replaceRange(
+        lastImport.end,
+        lastImport.end,
+        '\n$importScreen',
+      );
+    } else {
+      content = '$importScreen\n$content';
+    }
+  }
+
+  // Flexible route list regex for [] or <GetPage>[]
+  final routesRegex =
+      RegExp(r'static final routes\s*=\s*(<GetPage>)?\[(.*?)\];', dotAll: true);
   final match = routesRegex.firstMatch(content);
 
   if (match != null) {
-    final currentRoutes = match.group(1);
-    final updatedRoutes = '$currentRoutes\n    $pageRegistration';
-    content = content.replaceFirst(routesRegex, 'static final routes = [${updatedRoutes}\n  ];');
+    final currentRoutes = match.group(2)?.trim() ?? '';
+    final updatedRoutes = (currentRoutes.isEmpty)
+        ? '  $pageRegistration'
+        : '$currentRoutes\n    $pageRegistration';
+
+    final newRoutes = match.group(1) != null
+        ? 'static final routes = <GetPage>[\n$updatedRoutes\n  ];'
+        : 'static final routes = [\n$updatedRoutes\n  ];';
+
+    content = content.replaceFirst(routesRegex, newRoutes);
+
     await appRoutesFile.writeAsString(content);
-    print('\x1B[32m✅ Route added to lib/config/app_routes.dart\x1B[0m');
+    print(
+        '\x1B[32m✅ Route for "$routeName" added to lib/config/app_routes.dart\x1B[0m');
   } else {
-    print('\x1B[31m❌ Could not locate routes list in app_routes.dart. Please add the route manually.\x1B[0m');
+    print(
+        '\x1B[31m❌ Could not locate routes list in app_routes.dart. Please ensure it uses: static final routes = []; or static final routes = <GetPage>[];\x1B[0m');
+    exit(1);
   }
 }
 
@@ -357,4 +406,5 @@ String _toPascalCase(String input) {
 String _splitPascalCase(String input) {
   return input.replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m[1]} ${m[2]}');
 }
+
 
