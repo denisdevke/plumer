@@ -38,6 +38,7 @@ Plumer brings **Laravel's `artisan` productivity** to Flutter + GetX + Dio.
 ✅ Checks for **Flutter project validity before running**  
 ✅ Inspired by `artisan` for clear, intuitive commands:
 
+- `init`
 - `make:controller`
 - `make:binding`
 - `make:screen`
@@ -53,7 +54,7 @@ Plumer brings **Laravel's `artisan` productivity** to Flutter + GetX + Dio.
 cd your_flutter_project
 ```
 
-2️⃣ Download Plumer:
+2️⃣ Download **Plumer**:
 
 ```bash
 wget https://raw.githubusercontent.com/denisdevke/plumer/main/plumer -O plumer
@@ -71,7 +72,31 @@ chmod +x plumer
 alias plumer="dart $(pwd)/plumer"
 ```
 
+5️⃣ Initialize your Flutter project with **GetX** and **Dio**, and auto-generate recommended folder structure:
+
+```bash
+./plumer init
+```
+
 ---
+
+✅ You are now ready to scaffold your project pages with:
+
+```bash
+./plumer make:page MyPage
+```
+
+This will automatically:
+
+✅ Create a **screen**  
+✅ Create a **controller**  
+✅ Create a **binding**  
+✅ Register the **route** in `lib/config/app_routes.dart`
+
+in a single, atomic command to **boost your GetX + Dio Flutter workflow**.
+
+---
+
 
 ## ⚡ Usage
 
