@@ -537,7 +537,7 @@ Future<void> _createService(String folder, String pascal, String snake, String p
   final baseServiceImport = 'package:$packageName/services/base_api_service.dart';
   
   await file.writeAsString('''
-import 'package:dio/dio.dart' as dio show Dio, FormData, MultipartFile;
+import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
 import '$importPath';
 import '$baseServiceImport';
@@ -553,7 +553,7 @@ class ${pascal}Service extends BaseApiService {
   static const String _baseEndpoint = '/${snake}';
   
   /// Get list of ${snake}s
-  Future<dio.Response> get${pascal}List({
+  Future<Response> get${pascal}List({
     int? page,
     int? limit,
     Map<String, dynamic>? filters,
@@ -582,7 +582,7 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Get ${snake} by ID
-  Future<dio.Response> get${pascal}ById(String id) async {
+  Future<Response> get${pascal}ById(String id) async {
     try {
       logInfo('Fetching ${snake} with ID: \$id');
       
@@ -600,7 +600,7 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Create new ${snake}
-  Future<dio.Response> create${pascal}(Map<String, dynamic> data) async {
+  Future<Response> create${pascal}(Map<String, dynamic> data) async {
     try {
       logInfo('Creating new ${snake}', data: data);
       
@@ -619,7 +619,7 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Update ${snake} by ID
-  Future<dio.Response> update${pascal}(String id, Map<String, dynamic> data) async {
+  Future<Response> update${pascal}(String id, Map<String, dynamic> data) async {
     try {
       logInfo('Updating ${snake} with ID: \$id', data: data);
       
@@ -638,7 +638,7 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Delete ${snake} by ID
-  Future<dio.Response> delete${pascal}(String id) async {
+  Future<Response> delete${pascal}(String id) async {
     try {
       logInfo('Deleting ${snake} with ID: \$id');
       
@@ -656,12 +656,12 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Upload file for ${snake}
-  Future<dio.Response> upload${pascal}File(String id, String filePath) async {
+  Future<Response> upload${pascal}File(String id, String filePath) async {
     try {
       logInfo('Uploading file for ${snake} with ID: \$id');
       
-      final formData = dio.FormData.fromMap({
-        'file': await dio.MultipartFile.fromFile(filePath),
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(filePath),
         '${snake}_id': id,
       });
       
@@ -680,7 +680,7 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Search ${snake}s
-  Future<dio.Response> search${pascal}s(String query, {
+  Future<Response> search${pascal}s(String query, {
     int? page,
     int? limit,
   }) async {
@@ -1512,7 +1512,7 @@ class ${pascal} extends BaseModel {
 ''');
 
   print('\x1B[32m✅ Created ${pascal} model in $dir/${snake}_model.dart\x1B[0m');
-  print('\x1B[36m💡 Model extends BaseModel with: CRUD operations, validation, fillables, and API integration (imports fixed)\x1B[0m');
+  print('\x1B[36m💡 Model extends BaseModel with: CRUD operations, validation, fillables, and API integration\x1B[0m');
 }
 
 Future<void> _ensureBaseModel(String packageName) async {
@@ -1525,7 +1525,7 @@ Future<void> _ensureBaseModel(String packageName) async {
   await baseModelFile.create(recursive: true);
   
   await baseModelFile.writeAsString('''
-import 'package:dio/dio.dart' as dio show Dio;
+import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:$packageName/config/api_endpoints.dart';
 
@@ -1566,10 +1566,10 @@ abstract class BaseModel {
   final Map<String, dynamic> _attributes = {};
   
   /// Dio instance for API calls
-  static dio.Dio get _dio {
-    final dioInstance = dio.Dio();
+  static Dio get _dio {
+    final dio = Dio();
     // Add interceptors, headers, etc. as needed
-    return dioInstance;
+    return dio;
   }
 
   BaseModel({
