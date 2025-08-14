@@ -230,6 +230,35 @@
                             Automatically generates controllers, bindings, screens, and routes with proper imports and structure.
                         </dd>
                     </div>
+
+                    <div class="relative">
+                        <dt>
+                            <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-plumer-500 text-white">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                                </svg>
+                            </div>
+                            <p class="ml-16 text-lg leading-6 font-medium text-gray-900">Widget Installation</p>
+                        </dt>
+                        <dd class="mt-2 ml-16 text-base text-gray-500">
+                            Install pre-built, customizable widgets directly from GitHub with a single command.
+                        </dd>
+                    </div>
+
+                    <div class="relative">
+                        <dt>
+                            <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-plumer-500 text-white">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <p class="ml-16 text-lg leading-6 font-medium text-gray-900">Best Practices</p>
+                        </dt>
+                        <dd class="mt-2 ml-16 text-base text-gray-500">
+                            All generated code follows Flutter and GetX best practices with proper naming conventions.
+                        </dd>
+                    </div>
                 </dl>
             </div>
         </div>
@@ -306,7 +335,10 @@
                                     plumer make:page User/Profile<br><br>
                                     # Or create individual components<br>
                                     plumer make:controller Auth/Login<br>
-                                    plumer make:screen Settings/Theme
+                                    plumer make:screen Settings/Theme<br><br>
+                                    # Install ready-made widgets<br>
+                                    plumer install:widget slider<br>
+                                    plumer install:widget button lib/components
                                 </code>
                             </div>
                         </div>
@@ -370,10 +402,21 @@
 
                         <!-- Make Screen Command -->
                         <div class="bg-gray-50 rounded-lg p-6">
-                            <h4 class="text-lg font-semibred text-gray-900 mb-2">plumer make:screen [path]</h4>
+                            <h4 class="text-lg font-semibold text-gray-900 mb-2">plumer make:screen [path]</h4>
                             <p class="text-gray-600 mb-3">Generates a Flutter screen/page widget with themed UI components.</p>
                             <div class="text-sm text-gray-500">
                                 <strong>Example:</strong> <code class="bg-white px-2 py-1 rounded">plumer make:screen Dashboard/Analytics</code>
+                            </div>
+                        </div>
+
+                        <!-- Install Widget Command -->
+                        <div class="bg-indigo-50 rounded-lg p-6 border border-indigo-200">
+                            <h4 class="text-lg font-semibold text-indigo-900 mb-2">🆕 plumer install:widget [name] [folder?]</h4>
+                            <p class="text-indigo-800 mb-3">Downloads and installs ready-made widgets from the Plumer widget repository.</p>
+                            <div class="text-sm text-indigo-700">
+                                <strong>Examples:</strong><br>
+                                <code class="bg-white px-2 py-1 rounded mr-2">plumer install:widget slider</code><br>
+                                <code class="bg-white px-2 py-1 rounded">plumer install:widget button lib/components</code>
                             </div>
                         </div>
 

@@ -1,9 +1,15 @@
 #!/usr/bin/env dart
 
 import 'dart:io';
+import 'dart:convert';
 
 Future<void> main(List<String> arguments) async {
   print('\x1B[36m🪶 Plumer CLI - Flutter scaffolding made easy\x1B[0m');
+
+  if (arguments.isEmpty || arguments[0] == 'help' || arguments[0] == '--help' || arguments[0] == '-h') {
+    _showHelp();
+    exit(0);
+  }
 
   if (!await _isFlutterProject()) {
     print('\x1B[31m❌ This is not a Flutter project. Exiting.\x1B[0m');
@@ -15,6 +21,22 @@ Future<void> main(List<String> arguments) async {
 
   if (command == 'init') {
     await _initProject();
+  } else if (command.startsWith('install:')) {
+    final subCommand = command.split(':');
+    if (subCommand.length == 2 && subCommand[1] == 'widget') {
+      if (arguments.length < 2) {
+        print('\x1B[31m❌ Missing required widget name for "install:widget".\x1B[0m');
+        print('Example: plumer install:widget slider');
+        print('         plumer install:widget slider lib/components');
+        exit(1);
+      }
+      final widgetName = arguments[1];
+      final customPath = arguments.length > 2 ? arguments[2] : null;
+      await _installWidget(widgetName, customPath);
+    } else {
+      print('\x1B[31m❌ Unknown install command: $command\x1B[0m');
+      print('Available: install:widget');
+    }
   } else {
     if (arguments.length < 2) {
       print('\x1B[31m❌ Missing required path argument for "$command".\x1B[0m');
@@ -45,6 +67,7 @@ Future<void> main(List<String> arguments) async {
         break;
       default:
         print('\x1B[31m❌ Unknown command: $command\x1B[0m');
+        _showHelp();
     }
   }
 }
@@ -410,6 +433,105 @@ class PlumerApp extends StatelessWidget {
   print('\x1B[36m🎉 Plumer initialization complete! Run your app with:\n   flutter run\x1B[0m');
 }
 
+Future<void> _installWidget(String widgetName, String? customPath) async {
+  print('\x1B[36m📦 Installing widget: $widgetName\x1B[0m');
+  
+  // Determine the target folder
+  final targetFolder = customPath ?? 'lib/widgets';
+  
+  // Create target directory if it doesn't exist
+  final targetDir = Directory(targetFolder);
+  if (!targetDir.existsSync()) {
+    await targetDir.create(recursive: true);
+    print('\x1B[32m✅ Created directory: $targetFolder\x1B[0m');
+  }
+  
+  // Construct the GitHub raw file URL
+  final githubUrl = 'https://raw.githubusercontent.com/dennokorir/plumer/main/widgets/$widgetName.dart';
+  final targetFile = File('$targetFolder/$widgetName.dart');
+  
+  // Check if file already exists
+  if (targetFile.existsSync()) {
+    print('\x1B[33m⚠️  Widget $widgetName.dart already exists in $targetFolder\x1B[0m');
+    print('Do you want to overwrite it? (y/N): ');
+    final response = stdin.readLineSync()?.toLowerCase();
+    if (response != 'y' && response != 'yes') {
+      print('\x1B[36m📋 Installation cancelled.\x1B[0m');
+      return;
+    }
+  }
+  
+  try {
+    print('\x1B[36m⬇️  Downloading from GitHub...\x1B[0m');
+    
+    // Download the widget file from GitHub
+    final result = await Process.run('curl', [
+      '-s',
+      '-f',
+      '-L',
+      githubUrl,
+    ]);
+    
+    if (result.exitCode == 0 && result.stdout.toString().trim().isNotEmpty) {
+      final widgetContent = result.stdout.toString();
+      
+      // Check if we got a valid Dart file (basic validation)
+      if (!widgetContent.contains('class') || widgetContent.contains('404: Not Found')) {
+        print('\x1B[31m❌ Widget "$widgetName" not found in the repository.\x1B[0m');
+        print('Available widgets: slider, button, card, input, dialog');
+        print('Or check: https://github.com/dennokorir/plumer/tree/main/widgets');
+        return;
+      }
+      
+      // Write the file
+      await targetFile.writeAsString(widgetContent);
+      
+      print('\x1B[32m✅ Successfully installed $widgetName.dart to $targetFolder\x1B[0m');
+      
+      // Show usage instructions
+      print('\x1B[36m💡 Usage instructions:\x1B[0m');
+      print('   1. Import the widget in your screen/page:');
+      print('      import \'package:your_app/$targetFolder/$widgetName.dart\';');
+      print('   2. Use it in your widget tree:');
+      print('      ${_toPascalCase(widgetName)}()');
+      
+    } else {
+      print('\x1B[31m❌ Failed to download widget from GitHub.\x1B[0m');
+      print('Error: ${result.stderr}');
+      print('Please check your internet connection and try again.');
+    }
+    
+  } catch (e) {
+    print('\x1B[31m❌ Error downloading widget: $e\x1B[0m');
+    print('Please ensure curl is installed and you have internet connectivity.');
+  }
+}
+
+void _showHelp() {
+  print('\x1B[36m🪶 Plumer CLI - Available Commands:\x1B[0m');
+  print('');
+  print('\x1B[33mProject Setup:\x1B[0m');
+  print('  init                     Initialize project with GetX, themes, and structure');
+  print('');
+  print('\x1B[33mCode Generation:\x1B[0m');
+  print('  make:controller [path]   Generate a GetX controller');
+  print('  make:binding [path]      Generate a GetX binding');
+  print('  make:screen [path]       Generate a Flutter screen/page');
+  print('  make:page [path]         Generate complete page (controller + binding + screen + route)');
+  print('');
+  print('\x1B[33mWidget Installation:\x1B[0m');
+  print('  install:widget [name]              Install widget to lib/widgets/');
+  print('  install:widget [name] [folder]     Install widget to custom folder');
+  print('');
+  print('\x1B[33mExamples:\x1B[0m');
+  print('  plumer init');
+  print('  plumer make:page User/Profile');
+  print('  plumer make:controller Auth/Login');
+  print('  plumer install:widget slider');
+  print('  plumer install:widget button lib/components');
+  print('');
+  print('\x1B[33mFor more information, visit:\x1B[0m https://github.com/dennokorir/plumer');
+}
 
 Future<bool> _isFlutterProject() async {
   final pubspec = File('pubspec.yaml');
