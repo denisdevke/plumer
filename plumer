@@ -65,6 +65,9 @@ Future<void> main(List<String> arguments) async {
       case 'make:page':
         await _makePage(folderPath, classBaseName, snakeName, packageName);
         break;
+      case 'make:service':
+        await _createService(folderPath, classBaseName, snakeName, packageName);
+        break;
       default:
         print('\x1B[31m❌ Unknown command: $command\x1B[0m');
         _showHelp();
@@ -507,6 +510,537 @@ Future<void> _installWidget(String widgetName, String? customPath) async {
   }
 }
 
+Future<void> _createService(String folder, String pascal, String snake, String packageName) async {
+  final dir = 'lib/services${folder.isNotEmpty ? '/$folder' : ''}';
+  final file = File('$dir/${snake}_service.dart');
+  
+  // Check if file already exists
+  if (file.existsSync()) {
+    print('\x1B[33m⚠️  Service ${snake}_service.dart already exists in $dir\x1B[0m');
+    print('Do you want to overwrite it? (y/N): ');
+    final response = stdin.readLineSync()?.toLowerCase();
+    if (response != 'y' && response != 'yes') {
+      print('\x1B[36m📋 Service creation cancelled.\x1B[0m');
+      return;
+    }
+  }
+  
+  // Ensure required files exist
+  await _ensureApiConfig(packageName);
+  await _ensureBaseApiService(packageName);
+  
+  await file.create(recursive: true);
+  final importPath = 'package:$packageName/config/api_endpoints.dart';
+  final baseServiceImport = 'package:$packageName/services/base_api_service.dart';
+  
+  await file.writeAsString('''
+import 'package:dio/dio.dart';
+import 'package:get/get.dart';
+import '$importPath';
+import '$baseServiceImport';
+
+/// ${pascal}Service - Handles all ${pascal.toLowerCase()} related API calls
+/// 
+/// Usage:
+/// ```dart
+/// final service = Get.find<${pascal}Service>();
+/// final result = await service.get${pascal}List();
+/// ```
+class ${pascal}Service extends BaseApiService {
+  static const String _baseEndpoint = '/${snake}';
+  
+  /// Get list of ${snake}s
+  Future<Response> get${pascal}List({
+    int? page,
+    int? limit,
+    Map<String, dynamic>? filters,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      
+      if (page != null) queryParams['page'] = page;
+      if (limit != null) queryParams['limit'] = limit;
+      if (filters != null) queryParams.addAll(filters);
+      
+      logInfo('Fetching ${snake} list', data: queryParams);
+      
+      final response = await dio.get(
+        ApiEndpoints.buildUrl(_baseEndpoint),
+        queryParameters: queryParams.isEmpty ? null : queryParams,
+      );
+      
+      logSuccess('Successfully fetched ${snake} list');
+      return response;
+      
+    } catch (e) {
+      logError('Failed to fetch ${snake} list', error: e);
+      rethrow;
+    }
+  }
+  
+  /// Get ${snake} by ID
+  Future<Response> get${pascal}ById(String id) async {
+    try {
+      logInfo('Fetching ${snake} with ID: \$id');
+      
+      final response = await dio.get(
+        ApiEndpoints.buildUrl('\$_baseEndpoint/\$id'),
+      );
+      
+      logSuccess('Successfully fetched ${snake} with ID: \$id');
+      return response;
+      
+    } catch (e) {
+      logError('Failed to fetch ${snake} with ID: \$id', error: e);
+      rethrow;
+    }
+  }
+  
+  /// Create new ${snake}
+  Future<Response> create${pascal}(Map<String, dynamic> data) async {
+    try {
+      logInfo('Creating new ${snake}', data: data);
+      
+      final response = await dio.post(
+        ApiEndpoints.buildUrl(_baseEndpoint),
+        data: data,
+      );
+      
+      logSuccess('Successfully created ${snake}');
+      return response;
+      
+    } catch (e) {
+      logError('Failed to create ${snake}', error: e);
+      rethrow;
+    }
+  }
+  
+  /// Update ${snake} by ID
+  Future<Response> update${pascal}(String id, Map<String, dynamic> data) async {
+    try {
+      logInfo('Updating ${snake} with ID: \$id', data: data);
+      
+      final response = await dio.put(
+        ApiEndpoints.buildUrl('\$_baseEndpoint/\$id'),
+        data: data,
+      );
+      
+      logSuccess('Successfully updated ${snake} with ID: \$id');
+      return response;
+      
+    } catch (e) {
+      logError('Failed to update ${snake} with ID: \$id', error: e);
+      rethrow;
+    }
+  }
+  
+  /// Delete ${snake} by ID
+  Future<Response> delete${pascal}(String id) async {
+    try {
+      logInfo('Deleting ${snake} with ID: \$id');
+      
+      final response = await dio.delete(
+        ApiEndpoints.buildUrl('\$_baseEndpoint/\$id'),
+      );
+      
+      logSuccess('Successfully deleted ${snake} with ID: \$id');
+      return response;
+      
+    } catch (e) {
+      logError('Failed to delete ${snake} with ID: \$id', error: e);
+      rethrow;
+    }
+  }
+  
+  /// Upload file for ${snake}
+  Future<Response> upload${pascal}File(String id, String filePath) async {
+    try {
+      logInfo('Uploading file for ${snake} with ID: \$id');
+      
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(filePath),
+        '${snake}_id': id,
+      });
+      
+      final response = await dio.post(
+        ApiEndpoints.buildUrl('\$_baseEndpoint/\$id/upload'),
+        data: formData,
+      );
+      
+      logSuccess('Successfully uploaded file for ${snake} with ID: \$id');
+      return response;
+      
+    } catch (e) {
+      logError('Failed to upload file for ${snake} with ID: \$id', error: e);
+      rethrow;
+    }
+  }
+  
+  /// Search ${snake}s
+  Future<Response> search${pascal}s(String query, {
+    int? page,
+    int? limit,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{
+        'q': query,
+      };
+      
+      if (page != null) queryParams['page'] = page;
+      if (limit != null) queryParams['limit'] = limit;
+      
+      logInfo('Searching ${snake}s with query: \$query');
+      
+      final response = await dio.get(
+        ApiEndpoints.buildUrl('\$_baseEndpoint/search'),
+        queryParameters: queryParams,
+      );
+      
+      logSuccess('Successfully searched ${snake}s');
+      return response;
+      
+    } catch (e) {
+      logError('Failed to search ${snake}s', error: e);
+      rethrow;
+    }
+  }
+}
+''');
+  
+  print('\x1B[32m✅ Service created: ${file.path}\x1B[0m');
+  
+  // Show usage instructions
+  print('\x1B[36m💡 Usage instructions:\x1B[0m');
+  print('   1. Register the service in your binding:');
+  print('      Get.lazyPut<${pascal}Service>(() => ${pascal}Service());');
+  print('   2. Use it in your controller:');
+  print('      final service = Get.find<${pascal}Service>();');
+  print('      final response = await service.get${pascal}List();');
+}
+
+Future<void> _ensureApiConfig(String packageName) async {
+  final configFile = File('lib/config/api_endpoints.dart');
+  if (!configFile.existsSync()) {
+    await configFile.create(recursive: true);
+    await configFile.writeAsString('''
+/// API Endpoints Configuration
+/// 
+/// This file contains all API endpoints and configuration for your app.
+/// Update the base URL and endpoints according to your backend API.
+class ApiEndpoints {
+  // Base Configuration
+  static const String baseUrl = 'https://api.yourapp.com/v1';
+  static const int connectTimeout = 30000; // 30 seconds
+  static const int receiveTimeout = 30000; // 30 seconds
+  static const int sendTimeout = 30000; // 30 seconds
+  
+  // Environment Configuration
+  static bool get isDevelopment => const bool.fromEnvironment('DEBUG', defaultValue: true);
+  static String get environment => isDevelopment ? 'development' : 'production';
+  
+  // API Versioning
+  static const String apiVersion = 'v1';
+  
+  // Authentication Endpoints
+  static const String login = '/auth/login';
+  static const String register = '/auth/register';
+  static const String refreshToken = '/auth/refresh';
+  static const String logout = '/auth/logout';
+  static const String forgotPassword = '/auth/forgot-password';
+  static const String resetPassword = '/auth/reset-password';
+  
+  // User Endpoints
+  static const String profile = '/user/profile';
+  static const String updateProfile = '/user/profile';
+  static const String changePassword = '/user/change-password';
+  
+  // Common Endpoints
+  static const String upload = '/upload';
+  static const String config = '/config';
+  static const String health = '/health';
+  
+  // Utility Methods
+  static String buildUrl(String endpoint) {
+    if (endpoint.startsWith('http')) return endpoint;
+    return '\$baseUrl\$endpoint';
+  }
+  
+  static Map<String, String> get defaultHeaders => {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'X-API-Version': apiVersion,
+    'X-Platform': 'mobile',
+  };
+  
+  // Development URLs (override for local development)
+  static String get devBaseUrl => 'http://localhost:3000/api/v1';
+  static String get currentBaseUrl => isDevelopment ? devBaseUrl : baseUrl;
+}
+''');
+    print('\x1B[32m✅ Created lib/config/api_endpoints.dart\x1B[0m');
+  }
+}
+
+Future<void> _ensureBaseApiService(String packageName) async {
+  final serviceFile = File('lib/services/base_api_service.dart');
+  if (!serviceFile.existsSync()) {
+    await serviceFile.create(recursive: true);
+    await serviceFile.writeAsString('''
+import 'package:dio/dio.dart';
+import 'package:get/get.dart';
+import 'package:flutter/foundation.dart';
+import 'package:$packageName/config/api_endpoints.dart';
+
+/// Base API Service with authentication and interceptors
+/// 
+/// All service classes should extend this base class to get:
+/// - Automatic authentication headers
+/// - Request/response logging
+/// - Error handling
+/// - Retry logic
+abstract class BaseApiService extends GetxService {
+  late Dio _dio;
+  
+  Dio get dio => _dio;
+  
+  // Observable auth token
+  final RxString _authToken = ''.obs;
+  String get authToken => _authToken.value;
+  set authToken(String token) => _authToken.value = token;
+  
+  // Observable for network status
+  final RxBool isConnected = true.obs;
+  
+  @override
+  void onInit() {
+    super.onInit();
+    _initializeDio();
+  }
+  
+  void _initializeDio() {
+    _dio = Dio(BaseOptions(
+      baseUrl: ApiEndpoints.currentBaseUrl,
+      connectTimeout: const Duration(milliseconds: ApiEndpoints.connectTimeout),
+      receiveTimeout: const Duration(milliseconds: ApiEndpoints.receiveTimeout),
+      sendTimeout: const Duration(milliseconds: ApiEndpoints.sendTimeout),
+      headers: ApiEndpoints.defaultHeaders,
+    ));
+    
+    _addInterceptors();
+  }
+  
+  void _addInterceptors() {
+    // Auth Interceptor
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) {
+        // Add auth token if available
+        if (_authToken.value.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer \${_authToken.value}';
+        }
+        
+        // Add additional headers if needed
+        options.headers.addAll(_getAdditionalHeaders());
+        
+        if (kDebugMode) {
+          logInfo('🚀 REQUEST[\${options.method}] => \${options.path}', 
+            data: {
+              'headers': options.headers,
+              'queryParams': options.queryParameters,
+              'data': options.data,
+            }
+          );
+        }
+        
+        handler.next(options);
+      },
+      
+      onResponse: (response, handler) {
+        if (kDebugMode) {
+          logSuccess('✅ RESPONSE[\${response.statusCode}] => \${response.requestOptions.path}',
+            data: response.data
+          );
+        }
+        handler.next(response);
+      },
+      
+      onError: (DioException error, handler) {
+        _handleError(error);
+        handler.next(error);
+      },
+    ));
+    
+    // Retry Interceptor
+    _dio.interceptors.add(RetryInterceptor());
+    
+    // Logging Interceptor (only in debug mode)
+    if (kDebugMode) {
+      _dio.interceptors.add(LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        requestHeader: true,
+        responseHeader: false,
+        logPrint: (obj) => logInfo(obj.toString()),
+      ));
+    }
+  }
+  
+  Map<String, dynamic> _getAdditionalHeaders() {
+    return {
+      'X-Request-ID': DateTime.now().millisecondsSinceEpoch.toString(),
+      'X-Client-Version': '1.0.0', // Update with your app version
+    };
+  }
+  
+  void _handleError(DioException error) {
+    String errorMessage = 'An error occurred';
+    
+    switch (error.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        errorMessage = 'Connection timeout. Please check your internet connection.';
+        isConnected.value = false;
+        break;
+        
+      case DioExceptionType.badResponse:
+        final statusCode = error.response?.statusCode;
+        switch (statusCode) {
+          case 401:
+            errorMessage = 'Unauthorized. Please login again.';
+            _handleUnauthorized();
+            break;
+          case 403:
+            errorMessage = 'Access forbidden.';
+            break;
+          case 404:
+            errorMessage = 'Resource not found.';
+            break;
+          case 422:
+            errorMessage = 'Validation error.';
+            break;
+          case 500:
+            errorMessage = 'Server error. Please try again later.';
+            break;
+          default:
+            errorMessage = error.response?.data?['message'] ?? 'Server error occurred.';
+        }
+        break;
+        
+      case DioExceptionType.cancel:
+        errorMessage = 'Request was cancelled.';
+        break;
+        
+      case DioExceptionType.unknown:
+        errorMessage = 'No internet connection.';
+        isConnected.value = false;
+        break;
+        
+      default:
+        errorMessage = 'An unexpected error occurred.';
+    }
+    
+    logError('❌ API ERROR: \$errorMessage', error: error);
+    
+    // Show user-friendly error message
+    if (Get.isSnackbarOpen == false) {
+      Get.snackbar(
+        'Error',
+        errorMessage,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Get.theme.colorScheme.error,
+        colorText: Get.theme.colorScheme.onError,
+      );
+    }
+  }
+  
+  void _handleUnauthorized() {
+    // Clear auth token
+    _authToken.value = '';
+    
+    // Navigate to login screen
+    // Get.offAllNamed('/login'); // Uncomment and update route as needed
+  }
+  
+  // Helper methods for consistent logging
+  void logInfo(String message, {dynamic data}) {
+    if (kDebugMode) {
+      print('ℹ️ [API] \$message');
+      if (data != null) print('   Data: \$data');
+    }
+  }
+  
+  void logSuccess(String message, {dynamic data}) {
+    if (kDebugMode) {
+      print('✅ [API] \$message');
+      if (data != null) print('   Data: \$data');
+    }
+  }
+  
+  void logError(String message, {dynamic error, dynamic data}) {
+    if (kDebugMode) {
+      print('❌ [API] \$message');
+      if (error != null) print('   Error: \$error');
+      if (data != null) print('   Data: \$data');
+    }
+  }
+  
+  // Utility methods
+  void updateAuthToken(String token) {
+    authToken = token;
+  }
+  
+  void clearAuthToken() {
+    authToken = '';
+  }
+  
+  bool get isAuthenticated => authToken.isNotEmpty;
+  
+  // Override this in child classes for service-specific headers
+  Map<String, String> getServiceHeaders() => {};
+}
+
+/// Retry Interceptor for handling temporary network failures
+class RetryInterceptor extends Interceptor {
+  static const int maxRetries = 3;
+  static const Duration retryDelay = Duration(seconds: 1);
+  
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
+    if (_shouldRetry(err) && err.requestOptions.extra['retryCount'] != null) {
+      final retryCount = (err.requestOptions.extra['retryCount'] as int?) ?? 0;
+      
+      if (retryCount < maxRetries) {
+        err.requestOptions.extra['retryCount'] = retryCount + 1;
+        
+        // Wait before retry
+        await Future.delayed(retryDelay * (retryCount + 1));
+        
+        try {
+          final response = await Dio().fetch(err.requestOptions);
+          handler.resolve(response);
+          return;
+        } catch (e) {
+          // Continue to next retry or fail
+        }
+      }
+    }
+    
+    handler.next(err);
+  }
+  
+  bool _shouldRetry(DioException error) {
+    return error.type == DioExceptionType.connectionTimeout ||
+           error.type == DioExceptionType.receiveTimeout ||
+           error.type == DioExceptionType.unknown ||
+           (error.response?.statusCode != null && 
+            error.response!.statusCode! >= 500);
+  }
+}
+''');
+    print('\x1B[32m✅ Created lib/services/base_api_service.dart\x1B[0m');
+  }
+}
+
 void _showHelp() {
   print('\x1B[36m🪶 Plumer CLI - Available Commands:\x1B[0m');
   print('');
@@ -517,6 +1051,7 @@ void _showHelp() {
   print('  make:controller [path]   Generate a GetX controller');
   print('  make:binding [path]      Generate a GetX binding');
   print('  make:screen [path]       Generate a Flutter screen/page');
+  print('  make:service [path]      Generate an API service with Dio integration');
   print('  make:page [path]         Generate complete page (controller + binding + screen + route)');
   print('');
   print('\x1B[33mWidget Installation:\x1B[0m');
@@ -527,6 +1062,7 @@ void _showHelp() {
   print('  plumer init');
   print('  plumer make:page User/Profile');
   print('  plumer make:controller Auth/Login');
+  print('  plumer make:service Api/User');
   print('  plumer install:widget slider');
   print('  plumer install:widget button lib/components');
   print('');
