@@ -68,6 +68,9 @@ Future<void> main(List<String> arguments) async {
       case 'make:service':
         await _createService(folderPath, classBaseName, snakeName, packageName);
         break;
+      case 'make:model':
+        await _createModel(folderPath, classBaseName, snakeName, packageName);
+        break;
       default:
         print('\x1B[31m❌ Unknown command: $command\x1B[0m');
         _showHelp();
@@ -534,7 +537,7 @@ Future<void> _createService(String folder, String pascal, String snake, String p
   final baseServiceImport = 'package:$packageName/services/base_api_service.dart';
   
   await file.writeAsString('''
-import 'package:dio/dio.dart' show Dio, FormData, MultipartFile, Response as DioResponse;
+import 'package:dio/dio.dart' as dio show Dio, FormData, MultipartFile;
 import 'package:get/get.dart' hide Response;
 import '$importPath';
 import '$baseServiceImport';
@@ -550,7 +553,7 @@ class ${pascal}Service extends BaseApiService {
   static const String _baseEndpoint = '/${snake}';
   
   /// Get list of ${snake}s
-  Future<DioResponse> get${pascal}List({
+  Future<dio.Response> get${pascal}List({
     int? page,
     int? limit,
     Map<String, dynamic>? filters,
@@ -579,7 +582,7 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Get ${snake} by ID
-  Future<DioResponse> get${pascal}ById(String id) async {
+  Future<dio.Response> get${pascal}ById(String id) async {
     try {
       logInfo('Fetching ${snake} with ID: \$id');
       
@@ -597,7 +600,7 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Create new ${snake}
-  Future<DioResponse> create${pascal}(Map<String, dynamic> data) async {
+  Future<dio.Response> create${pascal}(Map<String, dynamic> data) async {
     try {
       logInfo('Creating new ${snake}', data: data);
       
@@ -616,7 +619,7 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Update ${snake} by ID
-  Future<DioResponse> update${pascal}(String id, Map<String, dynamic> data) async {
+  Future<dio.Response> update${pascal}(String id, Map<String, dynamic> data) async {
     try {
       logInfo('Updating ${snake} with ID: \$id', data: data);
       
@@ -635,7 +638,7 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Delete ${snake} by ID
-  Future<DioResponse> delete${pascal}(String id) async {
+  Future<dio.Response> delete${pascal}(String id) async {
     try {
       logInfo('Deleting ${snake} with ID: \$id');
       
@@ -653,12 +656,12 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Upload file for ${snake}
-  Future<DioResponse> upload${pascal}File(String id, String filePath) async {
+  Future<dio.Response> upload${pascal}File(String id, String filePath) async {
     try {
       logInfo('Uploading file for ${snake} with ID: \$id');
       
-      final formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(filePath),
+      final formData = dio.FormData.fromMap({
+        'file': await dio.MultipartFile.fromFile(filePath),
         '${snake}_id': id,
       });
       
@@ -677,7 +680,7 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Search ${snake}s
-  Future<DioResponse> search${pascal}s(String query, {
+  Future<dio.Response> search${pascal}s(String query, {
     int? page,
     int? limit,
   }) async {
@@ -1051,6 +1054,7 @@ void _showHelp() {
   print('  make:controller [path]   Generate a GetX controller');
   print('  make:binding [path]      Generate a GetX binding');
   print('  make:screen [path]       Generate a Flutter screen/page');
+  print('  make:model [path]        Generate a data model with JSON serialization');
   print('  make:service [path]      Generate an API service with Dio integration');
   print('  make:page [path]         Generate complete page (controller + binding + screen + route)');
   print('');
@@ -1062,6 +1066,7 @@ void _showHelp() {
   print('  plumer init');
   print('  plumer make:page User/Profile');
   print('  plumer make:controller Auth/Login');
+  print('  plumer make:model User');
   print('  plumer make:service Api/User');
   print('  plumer install:widget slider');
   print('  plumer install:widget button lib/components');
@@ -1300,6 +1305,648 @@ String _toPascalCase(String input) {
 
 String _splitPascalCase(String input) {
   return input.replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m[1]} ${m[2]}');
+}
+
+Future<void> _createModel(String folder, String pascal, String snake, String packageName) async {
+  final dir = 'lib/models${folder.isNotEmpty ? '/$folder' : ''}';
+  final file = File('$dir/${snake}_model.dart');
+  
+  // Check if file already exists
+  if (file.existsSync()) {
+    print('\x1B[33m⚠️  Model ${snake}_model.dart already exists in $dir\x1B[0m');
+    print('Do you want to overwrite it? (y/N): ');
+    final response = stdin.readLineSync()?.toLowerCase();
+    if (response != 'y' && response != 'yes') {
+      print('\x1B[36m📋 Model creation cancelled.\x1B[0m');
+      return;
+    }
+  }
+
+  // Ensure base model exists
+  await _ensureBaseModel(packageName);
+  
+  await file.create(recursive: true);
+  
+  await file.writeAsString('''
+import 'package:$packageName/models/base_model.dart';
+
+/// ${pascal} model class extending BaseModel
+/// 
+/// Inherits CRUD operations, validation, and API integration from BaseModel.
+/// Configure fillable fields and customize behavior as needed.
+/// 
+/// Usage:
+/// ```dart
+/// // Create and save
+/// final ${snake} = ${pascal}();
+/// ${snake}.fill({'name': 'John', 'email': 'john@example.com'});
+/// await ${snake}.save();
+/// 
+/// // Find by ID
+/// final ${snake} = await ${pascal}.find(1);
+/// 
+/// // Update
+/// ${snake}.set('name', 'Jane');
+/// await ${snake}.update();
+/// 
+/// // Delete
+/// await ${snake}.delete();
+/// 
+/// // Get all
+/// final ${snake}List = await ${pascal}.all();
+/// ```
+class ${pascal} extends BaseModel {
+  // Define your model fields
+  String? name;
+  String? email;
+  String? description;
+  bool isActive;
+
+  ${pascal}({
+    super.id,
+    this.name,
+    this.email,
+    this.description,
+    this.isActive = true,
+    super.createdAt,
+    super.updatedAt,
+  });
+
+  /// Define which fields can be mass assigned
+  @override
+  List<String> get fillable => [
+    'name',
+    'email',
+    'description',
+    'is_active',
+  ];
+
+  /// API endpoint for this model
+  @override
+  String get endpoint => '/${snake}s';
+
+  /// Primary key field name
+  @override
+  String get primaryKey => 'id';
+
+  /// Creates a ${pascal} instance from JSON data
+  factory ${pascal}.fromJson(Map<String, dynamic> json) {
+    return ${pascal}(
+      id: json['id'] as int?,
+      name: json['name'] as String?,
+      email: json['email'] as String?,
+      description: json['description'] as String?,
+      isActive: json['is_active'] as bool? ?? true,
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'] as String)
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.tryParse(json['updated_at'] as String)
+          : null,
+    );
+  }
+
+  /// Converts the ${pascal} instance to JSON
+  @override
+  Map<String, dynamic> toJson() {
+    final json = super.toJson();
+    json.addAll({
+      'name': name,
+      'email': email,
+      'description': description,
+      'is_active': isActive,
+    });
+    return json;
+  }
+
+  /// Custom validation rules for ${pascal}
+  @override
+  bool isValid() {
+    if (!super.isValid()) return false;
+    
+    // Custom validation
+    if (name?.isEmpty ?? true) {
+      addError('name', 'Name is required');
+      return false;
+    }
+    
+    if (email != null && email!.isNotEmpty && !_isValidEmail(email!)) {
+      addError('email', 'Invalid email format');
+      return false;
+    }
+    
+    return true;
+  }
+
+  /// Email validation helper
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}\$').hasMatch(email);
+  }
+
+  /// Gets display name for UI
+  String get displayName => name?.isNotEmpty == true ? name! : 'Unnamed ${pascal}';
+
+  /// Check if ${snake} is active
+  bool get active => isActive;
+
+  /// Static methods for model operations
+  
+  /// Get all ${snake}s
+  static Future<List<${pascal}>> all() async {
+    final instance = ${pascal}();
+    final results = await instance.getAll();
+    return results.map((json) => ${pascal}.fromJson(json)).toList();
+  }
+
+  /// Find ${snake} by ID
+  static Future<${pascal}?> find(int id) async {
+    final instance = ${pascal}();
+    final result = await instance.findById(id);
+    return result != null ? ${pascal}.fromJson(result) : null;
+  }
+
+  /// Create new ${snake}
+  static Future<${pascal}?> create(Map<String, dynamic> data) async {
+    final instance = ${pascal}();
+    instance.fill(data);
+    if (await instance.save()) {
+      return instance;
+    }
+    return null;
+  }
+
+  /// Get ${snake}s with pagination
+  static Future<List<${pascal}>> paginate({
+    int page = 1,
+    int limit = 15,
+    Map<String, dynamic>? filters,
+  }) async {
+    final instance = ${pascal}();
+    final results = await instance.getPaginated(
+      page: page,
+      limit: limit,
+      filters: filters,
+    );
+    return results.map((json) => ${pascal}.fromJson(json)).toList();
+  }
+
+  /// Search ${snake}s
+  static Future<List<${pascal}>> search(String query) async {
+    final instance = ${pascal}();
+    final results = await instance.searchRecords(query);
+    return results.map((json) => ${pascal}.fromJson(json)).toList();
+  }
+
+  /// Count all ${snake}s
+  static Future<int> count() async {
+    final instance = ${pascal}();
+    return await instance.getCount();
+  }
+
+  /// Create instance from BaseModel data
+  @override
+  ${pascal} fromBaseModel(Map<String, dynamic> data) {
+    return ${pascal}.fromJson(data);
+  }
+}
+''');
+
+  print('\x1B[32m✅ Created ${pascal} model in $dir/${snake}_model.dart\x1B[0m');
+  print('\x1B[36m💡 Model extends BaseModel with: CRUD operations, validation, fillables, and API integration (imports fixed)\x1B[0m');
+}
+
+Future<void> _ensureBaseModel(String packageName) async {
+  final baseModelFile = File('lib/models/base_model.dart');
+  
+  if (baseModelFile.existsSync()) {
+    return; // Base model already exists
+  }
+  
+  await baseModelFile.create(recursive: true);
+  
+  await baseModelFile.writeAsString('''
+import 'package:dio/dio.dart' as dio show Dio;
+import 'package:get/get.dart' hide Response;
+import 'package:$packageName/config/api_endpoints.dart';
+
+/// BaseModel class providing CRUD operations and API integration
+/// 
+/// All models should extend this class to inherit:
+/// - CRUD operations (save, update, delete, find)
+/// - Mass assignment with fillables
+/// - Validation and error handling
+/// - API integration with Dio
+/// - Field getters and setters
+/// 
+/// Usage:
+/// ```dart
+/// class User extends BaseModel {
+///   String? name;
+///   String? email;
+///   
+///   @override
+///   List<String> get fillable => ['name', 'email'];
+///   
+///   @override
+///   String get endpoint => '/users';
+/// }
+/// ```
+abstract class BaseModel {
+  int? id;
+  DateTime? createdAt;
+  DateTime? updatedAt;
+  
+  /// Validation errors
+  final Map<String, List<String>> _errors = {};
+  
+  /// Original attributes for tracking changes
+  final Map<String, dynamic> _original = {};
+  
+  /// Current attributes
+  final Map<String, dynamic> _attributes = {};
+  
+  /// Dio instance for API calls
+  static dio.Dio get _dio {
+    final dioInstance = dio.Dio();
+    // Add interceptors, headers, etc. as needed
+    return dioInstance;
+  }
+
+  BaseModel({
+    this.id,
+    this.createdAt,
+    this.updatedAt,
+  }) {
+    _syncAttributes();
+  }
+
+  /// Define which fields can be mass assigned
+  List<String> get fillable => [];
+
+  /// API endpoint for this model
+  String get endpoint;
+
+  /// Primary key field name
+  String get primaryKey => 'id';
+
+  /// Table/resource name (derived from endpoint)
+  String get table => endpoint.replaceFirst('/', '');
+
+  /// Check if model exists in database
+  bool get exists => id != null;
+
+  /// Check if model is new (not saved yet)
+  bool get isNew => !exists;
+
+  /// Get all validation errors
+  Map<String, List<String>> get errors => Map.from(_errors);
+
+  /// Check if model has validation errors
+  bool get hasErrors => _errors.isNotEmpty;
+
+  /// Get first error message
+  String? get firstError {
+    if (_errors.isEmpty) return null;
+    final firstKey = _errors.keys.first;
+    return _errors[firstKey]?.first;
+  }
+
+  /// Sync current model state to attributes
+  void _syncAttributes() {
+    _attributes.clear();
+    _attributes['id'] = id;
+    _attributes['created_at'] = createdAt?.toIso8601String();
+    _attributes['updated_at'] = updatedAt?.toIso8601String();
+  }
+
+  /// Mass assignment of attributes
+  void fill(Map<String, dynamic> data) {
+    data.forEach((key, value) {
+      if (fillable.contains(key)) {
+        set(key, value);
+      }
+    });
+  }
+
+  /// Set field value with fillable check
+  void set(String field, dynamic value) {
+    if (fillable.contains(field)) {
+      _attributes[field] = value;
+      _setModelProperty(field, value);
+    }
+  }
+
+  /// Get field value
+  dynamic get(String field) {
+    return _attributes[field];
+  }
+
+  /// Set model property via reflection-like approach
+  void _setModelProperty(String field, dynamic value) {
+    // This would ideally use reflection, but for simplicity
+    // we'll handle common field mappings
+    switch (field) {
+      case 'id':
+        id = value as int?;
+        break;
+      case 'created_at':
+        createdAt = value is String ? DateTime.tryParse(value) : value as DateTime?;
+        break;
+      case 'updated_at':
+        updatedAt = value is String ? DateTime.tryParse(value) : value as DateTime?;
+        break;
+    }
+  }
+
+  /// Add validation error
+  void addError(String field, String message) {
+    _errors.putIfAbsent(field, () => []).add(message);
+  }
+
+  /// Clear all errors
+  void clearErrors() {
+    _errors.clear();
+  }
+
+  /// Clear errors for specific field
+  void clearError(String field) {
+    _errors.remove(field);
+  }
+
+  /// Basic validation (override in child classes)
+  bool isValid() {
+    clearErrors();
+    return true;
+  }
+
+  /// Convert model to JSON
+  Map<String, dynamic> toJson() {
+    final json = <String, dynamic>{};
+    json['id'] = id;
+    json['created_at'] = createdAt?.toIso8601String();
+    json['updated_at'] = updatedAt?.toIso8601String();
+    return json;
+  }
+
+  /// Create model instance from BaseModel data (override in child classes)
+  BaseModel fromBaseModel(Map<String, dynamic> data);
+
+  /// Save model (create or update)
+  Future<bool> save() async {
+    if (!isValid()) return false;
+
+    try {
+      if (isNew) {
+        return await _create();
+      } else {
+        return await _update();
+      }
+    } catch (e) {
+      addError('save', 'Failed to save: \$e');
+      return false;
+    }
+  }
+
+  /// Create new record
+  Future<bool> _create() async {
+    final response = await _dio.post(
+      ApiEndpoints.buildUrl(endpoint),
+      data: toJson(),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        id = data['id'] as int?;
+        createdAt = data['created_at'] != null 
+          ? DateTime.tryParse(data['created_at'] as String) 
+          : null;
+        updatedAt = data['updated_at'] != null 
+          ? DateTime.tryParse(data['updated_at'] as String) 
+          : null;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  /// Update existing record
+  Future<bool> _update() async {
+    final response = await _dio.put(
+      ApiEndpoints.buildUrl('\$endpoint/\$id'),
+      data: toJson(),
+    );
+
+    if (response.statusCode == 200) {
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        updatedAt = data['updated_at'] != null 
+          ? DateTime.tryParse(data['updated_at'] as String) 
+          : null;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  /// Update model
+  Future<bool> update([Map<String, dynamic>? data]) async {
+    if (data != null) {
+      fill(data);
+    }
+    return await save();
+  }
+
+  /// Delete model
+  Future<bool> delete() async {
+    if (isNew) return false;
+
+    try {
+      final response = await _dio.delete(
+        ApiEndpoints.buildUrl('\$endpoint/\$id'),
+      );
+      return response.statusCode == 200 || response.statusCode == 204;
+    } catch (e) {
+      addError('delete', 'Failed to delete: \$e');
+      return false;
+    }
+  }
+
+  /// Refresh model from database
+  Future<bool> refresh() async {
+    if (isNew) return false;
+
+    try {
+      final data = await findById(id!);
+      if (data != null) {
+        final model = fromBaseModel(data);
+        // Update current instance with fresh data
+        id = model.id;
+        createdAt = model.createdAt;
+        updatedAt = model.updatedAt;
+        return true;
+      }
+      return false;
+    } catch (e) {
+      addError('refresh', 'Failed to refresh: \$e');
+      return false;
+    }
+  }
+
+  /// Find record by ID
+  Future<Map<String, dynamic>?> findById(int id) async {
+    try {
+      final response = await _dio.get(
+        ApiEndpoints.buildUrl('\$endpoint/\$id'),
+      );
+      
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return data is Map<String, dynamic> ? data : null;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Get all records
+  Future<List<Map<String, dynamic>>> getAll() async {
+    try {
+      final response = await _dio.get(
+        ApiEndpoints.buildUrl(endpoint),
+      );
+      
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map<String, dynamic> && data['data'] is List) {
+          return (data['data'] as List).cast<Map<String, dynamic>>();
+        } else if (data is List) {
+          return data.cast<Map<String, dynamic>>();
+        }
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Get paginated records
+  Future<List<Map<String, dynamic>>> getPaginated({
+    int page = 1,
+    int limit = 15,
+    Map<String, dynamic>? filters,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{
+        'page': page,
+        'limit': limit,
+      };
+      
+      if (filters != null) {
+        queryParams.addAll(filters);
+      }
+
+      final response = await _dio.get(
+        ApiEndpoints.buildUrl(endpoint),
+        queryParameters: queryParams,
+      );
+      
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map<String, dynamic> && data['data'] is List) {
+          return (data['data'] as List).cast<Map<String, dynamic>>();
+        } else if (data is List) {
+          return data.cast<Map<String, dynamic>>();
+        }
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Search records
+  Future<List<Map<String, dynamic>>> searchRecords(String query) async {
+    try {
+      final response = await _dio.get(
+        ApiEndpoints.buildUrl('\$endpoint/search'),
+        queryParameters: {'q': query},
+      );
+      
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map<String, dynamic> && data['data'] is List) {
+          return (data['data'] as List).cast<Map<String, dynamic>>();
+        } else if (data is List) {
+          return data.cast<Map<String, dynamic>>();
+        }
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Get count of records
+  Future<int> getCount() async {
+    try {
+      final response = await _dio.get(
+        ApiEndpoints.buildUrl('\$endpoint/count'),
+      );
+      
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map<String, dynamic> && data['count'] is int) {
+          return data['count'] as int;
+        } else if (data is int) {
+          return data;
+        }
+      }
+      return 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  /// Check if model was recently created (within last 24 hours)
+  bool get isRecentlyCreated {
+    if (createdAt == null) return false;
+    final now = DateTime.now();
+    final difference = now.difference(createdAt!);
+    return difference.inHours <= 24;
+  }
+
+  /// Check if model was recently updated (within last hour)
+  bool get isRecentlyUpdated {
+    if (updatedAt == null) return false;
+    final now = DateTime.now();
+    final difference = now.difference(updatedAt!);
+    return difference.inMinutes <= 60;
+  }
+
+  /// Convert to string for debugging
+  @override
+  String toString() {
+    return '\${runtimeType}(id: \$id, created: \$createdAt, updated: \$updatedAt)';
+  }
+
+  /// Equality comparison
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is BaseModel &&
+        other.runtimeType == runtimeType &&
+        other.id == id;
+  }
+
+  /// Hash code
+  @override
+  int get hashCode => Object.hash(runtimeType, id);
+}
+''');
+
+  print('\x1B[32m✅ Created BaseModel in lib/models/base_model.dart\x1B[0m');
 }
 
 

@@ -427,6 +427,16 @@
                             </div>
                         </div>
 
+                        <!-- Make Model Command -->
+                        <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
+                            <h4 class="text-lg font-semibold text-purple-900 mb-2">🆕 ./plumer make:model [path]</h4>
+                            <p class="text-purple-800 mb-3">Generates an ORM-style model class extending BaseModel with CRUD operations, fillables, validation, and API integration.</p>
+                            <div class="text-sm text-purple-700">
+                                <strong>Example:</strong> <code class="bg-white px-2 py-1 rounded">./plumer make:model User</code><br>
+                                <em>Laravel-inspired model with save(), update(), delete(), find(), fillables, validation, and automatic API calls</em>
+                            </div>
+                        </div>
+
                         <!-- Make Service Command -->
                         <div class="bg-green-50 rounded-lg p-6 border border-green-200">
                             <h4 class="text-lg font-semibold text-green-900 mb-2">🆕 ./plumer make:service [path]</h4>
@@ -624,6 +634,198 @@
                     <li>• Services extend BaseApiService for consistent configuration</li>
                     <li>• Use GetX dependency injection for clean service management</li>
                 </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Model Usage Examples Section -->
+    <section class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-12">
+                <h2 class="text-base text-plumer-600 font-semibold tracking-wide uppercase">ORM Models</h2>
+                <p class="mt-2 text-3xl leading-8 font-bold tracking-tight text-gray-900 sm:text-4xl">
+                    Laravel-Style Models for Flutter
+                </p>
+                <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+                    Complete ORM-style models with CRUD operations, fillables, validation, and automatic API integration.
+                </p>
+            </div>
+
+            <div class="grid gap-8 lg:grid-cols-2">
+                <!-- Model Generation -->
+                <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">1. Generate ORM Model</h3>
+                    <div class="code-block mb-4">
+                        <code class="text-green-400 text-sm">
+                            # Generate User model<br>
+                            ./plumer make:model User<br><br>
+                            # Generate nested model<br>
+                            ./plumer make:model Product/Category
+                        </code>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Creates:</p>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• <code class="bg-gray-100 px-2 py-1 rounded text-xs">lib/models/user_model.dart</code></li>
+                        <li>• <code class="bg-gray-100 px-2 py-1 rounded text-xs">lib/models/base_model.dart</code></li>
+                        <li>• CRUD operations (save, update, delete)</li>
+                        <li>• Fillable fields and mass assignment</li>
+                        <li>• Validation with error handling</li>
+                        <li>• Automatic API integration</li>
+                    </ul>
+                </div>
+
+                <!-- CRUD Operations -->
+                <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">2. CRUD Operations</h3>
+                    <div class="code-block">
+                        <code class="text-green-400 text-sm">
+                            // Create and save<br>
+                            final user = User();<br>
+                            user.fill({'name': 'John', 'email': 'john@example.com'});<br>
+                            await user.save(); // POST /users<br><br>
+                            // Find by ID<br>
+                            final user = await User.find(1); // GET /users/1<br><br>
+                            // Update<br>
+                            user?.set('name', 'Jane');<br>
+                            await user?.update(); // PUT /users/1<br><br>
+                            // Delete<br>
+                            await user?.delete(); // DELETE /users/1
+                        </code>
+                    </div>
+                </div>
+
+                <!-- Mass Assignment & Fillables -->
+                <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">3. Fillables & Mass Assignment</h3>
+                    <div class="code-block">
+                        <code class="text-green-400 text-sm">
+                            class User extends BaseModel {<br>
+                            &nbsp;&nbsp;String? name;<br>
+                            &nbsp;&nbsp;String? email;<br>
+                            &nbsp;&nbsp;bool isActive;<br><br>
+                            &nbsp;&nbsp;@override<br>
+                            &nbsp;&nbsp;List&lt;String&gt; get fillable => [<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;'name', 'email', 'is_active'<br>
+                            &nbsp;&nbsp;];<br><br>
+                            &nbsp;&nbsp;@override<br>
+                            &nbsp;&nbsp;String get endpoint => '/users';<br>
+                            }<br><br>
+                            // Safe mass assignment<br>
+                            user.fill(formData); // Only fillable fields assigned
+                        </code>
+                    </div>
+                </div>
+
+                <!-- Static Query Methods -->
+                <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">4. Static Query Methods</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-gray-50 rounded p-3">
+                            <code class="text-blue-600 font-semibold">User.all()</code>
+                            <p class="text-gray-600 mt-1">Get all users from API</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-3">
+                            <code class="text-blue-600 font-semibold">User.find(id)</code>
+                            <p class="text-gray-600 mt-1">Find user by ID</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-3">
+                            <code class="text-blue-600 font-semibold">User.create(data)</code>
+                            <p class="text-gray-600 mt-1">Create new user</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-3">
+                            <code class="text-blue-600 font-semibold">User.paginate()</code>
+                            <p class="text-gray-600 mt-1">Paginated results</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-3">
+                            <code class="text-blue-600 font-semibold">User.search(query)</code>
+                            <p class="text-gray-600 mt-1">Search users</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controller Integration -->
+                <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200 lg:col-span-2">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">5. Controller Integration</h3>
+                    <div class="code-block">
+                        <code class="text-green-400 text-sm">
+                            class UserController extends GetxController {<br>
+                            &nbsp;&nbsp;var users = &lt;User&gt;[].obs;<br>
+                            &nbsp;&nbsp;var isLoading = false.obs;<br><br>
+                            &nbsp;&nbsp;@override<br>
+                            &nbsp;&nbsp;void onInit() {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;super.onInit();<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;loadUsers();<br>
+                            &nbsp;&nbsp;}<br><br>
+                            &nbsp;&nbsp;// Load users with ORM<br>
+                            &nbsp;&nbsp;Future&lt;void&gt; loadUsers() async {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;isLoading.value = true;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;users.value = await User.all(); // API call handled automatically<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;isLoading.value = false;<br>
+                            &nbsp;&nbsp;}<br><br>
+                            &nbsp;&nbsp;// Create user with validation<br>
+                            &nbsp;&nbsp;Future&lt;void&gt; createUser(Map&lt;String, dynamic&gt; data) async {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;final user = User();<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;user.fill(data); // Mass assignment with fillables<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;if (!user.isValid()) {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get.snackbar('Error', user.firstError ?? 'Validation failed');<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;}<br><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;if (await user.save()) { // Automatic POST /users<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;users.add(user);<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get.snackbar('Success', 'User created successfully');<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                            &nbsp;&nbsp;}<br><br>
+                            &nbsp;&nbsp;// Update user<br>
+                            &nbsp;&nbsp;Future&lt;void&gt; updateUser(User user, Map&lt;String, dynamic&gt; data) async {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;user.fill(data);<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;if (await user.update()) { // Automatic PUT /users/:id<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;users.refresh(); // Update reactive list<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                            &nbsp;&nbsp;}<br><br>
+                            &nbsp;&nbsp;// Delete user<br>
+                            &nbsp;&nbsp;Future&lt;void&gt; deleteUser(User user) async {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;if (await user.delete()) { // Automatic DELETE /users/:id<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;users.remove(user);<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                            &nbsp;&nbsp;}<br>
+                            }
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 bg-purple-50 rounded-lg p-6 border border-purple-200">
+                <h3 class="text-lg font-semibold text-purple-900 mb-3">🎯 ORM Model Features</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div>
+                        <h4 class="font-semibold text-purple-800 mb-2">Laravel-Inspired</h4>
+                        <ul class="space-y-2 text-sm text-purple-800">
+                            <li>• Fillable fields for mass assignment</li>
+                            <li>• Eloquent-style CRUD operations</li>
+                            <li>• Automatic API endpoint handling</li>
+                            <li>• Built-in validation system</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-purple-800 mb-2">Security & Validation</h4>
+                        <ul class="space-y-2 text-sm text-purple-800">
+                            <li>• Mass assignment protection</li>
+                            <li>• Field-level validation with errors</li>
+                            <li>• Custom validation rules</li>
+                            <li>• Error collection and display</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-purple-800 mb-2">Developer Experience</h4>
+                        <ul class="space-y-2 text-sm text-purple-800">
+                            <li>• Automatic API integration</li>
+                            <li>• GetX reactive compatibility</li>
+                            <li>• Intuitive method names</li>
+                            <li>• Built-in error handling</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
