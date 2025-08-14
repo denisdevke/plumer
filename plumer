@@ -538,7 +538,7 @@ Future<void> _createService(String folder, String pascal, String snake, String p
   
   await file.writeAsString('''
 import 'package:dio/dio.dart';
-import 'package:get/get.dart' hide Response;
+import 'package:get/get.dart' hide Response, FormData, MultipartFile;
 import '$importPath';
 import '$baseServiceImport';
 
@@ -1526,7 +1526,7 @@ Future<void> _ensureBaseModel(String packageName) async {
   
   await baseModelFile.writeAsString('''
 import 'package:dio/dio.dart';
-import 'package:get/get.dart' hide Response;
+import 'package:get/get.dart' hide Response, FormData, MultipartFile;
 import 'package:$packageName/config/api_endpoints.dart';
 
 /// BaseModel class providing CRUD operations and API integration
