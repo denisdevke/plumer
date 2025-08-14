@@ -193,5 +193,5 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Console welcome message
     console.log('%cWelcome to Plumer CLI Documentation! 🪶', 'color: #6366f1; font-size: 16px; font-weight: bold;');
-    console.log('%cCheck out the source code at: https://github.com/dennokorir/plumer', 'color: #4f46e5;');
+    console.log('%cCheck out the source code at: https://github.com/denisdevke/plumer', 'color: #4f46e5;');
 });

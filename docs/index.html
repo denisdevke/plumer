@@ -87,9 +87,10 @@
                     <div class="ml-10 flex items-baseline space-x-4">
                         <a href="#home" class="nav-link text-plumer-600 hover:text-plumer-700 px-3 py-2 text-sm font-medium">Home</a>
                         <a href="#features" class="nav-link text-gray-600 hover:text-plumer-600 px-3 py-2 text-sm font-medium">Features</a>
+                        <a href="widgets.html" class="nav-link text-gray-600 hover:text-plumer-600 px-3 py-2 text-sm font-medium">Widgets</a>
                         <a href="#getting-started" class="nav-link text-gray-600 hover:text-plumer-600 px-3 py-2 text-sm font-medium">Getting Started</a>
                         <a href="#commands" class="nav-link text-gray-600 hover:text-plumer-600 px-3 py-2 text-sm font-medium">Commands</a>
-                        <a href="https://github.com/dennokorir/plumer" target="_blank" class="bg-plumer-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-plumer-700 transition-colors">
+                        <a href="https://github.com/denisdevke/plumer" target="_blank" class="bg-plumer-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-plumer-700 transition-colors">
                             GitHub
                         </a>
                     </div>
@@ -111,9 +112,10 @@
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
                 <a href="#home" class="nav-link-mobile text-plumer-600 block px-3 py-2 text-base font-medium">Home</a>
                 <a href="#features" class="nav-link-mobile text-gray-600 hover:text-plumer-600 block px-3 py-2 text-base font-medium">Features</a>
+                <a href="widgets.html" class="nav-link-mobile text-gray-600 hover:text-plumer-600 block px-3 py-2 text-base font-medium">Widgets</a>
                 <a href="#getting-started" class="nav-link-mobile text-gray-600 hover:text-plumer-600 block px-3 py-2 text-base font-medium">Getting Started</a>
                 <a href="#commands" class="nav-link-mobile text-gray-600 hover:text-plumer-600 block px-3 py-2 text-base font-medium">Commands</a>
-                <a href="https://github.com/dennokorir/plumer" target="_blank" class="bg-plumer-600 text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-plumer-700 transition-colors mx-3 mt-4">
+                <a href="https://github.com/denisdevke/plumer" target="_blank" class="bg-plumer-600 text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-plumer-700 transition-colors mx-3 mt-4">
                     GitHub
                 </a>
             </div>
@@ -140,7 +142,7 @@
                                 </a>
                             </div>
                             <div class="mt-3 sm:mt-0 sm:ml-3">
-                                <a href="https://github.com/dennokorir/plumer" target="_blank" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-plumer-700 hover:bg-plumer-800 md:py-4 md:text-lg md:px-10 transition-colors">
+                                <a href="https://github.com/denisdevke/plumer" target="_blank" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-plumer-700 hover:bg-plumer-800 md:py-4 md:text-lg md:px-10 transition-colors">
                                     View on GitHub
                                 </a>
                             </div>
@@ -299,15 +301,17 @@
                             <h3 class="ml-4 text-xl font-semibold text-gray-900">Install Plumer CLI</h3>
                         </div>
                         <div class="ml-14 mt-2">
-                            <p class="text-gray-600 mb-4">Add plumer to your system PATH or use it directly from your Flutter project directory:</p>
+                            <p class="text-gray-600 mb-4">Navigate to your Flutter project and download Plumer:</p>
                             <div class="code-block">
                                 <code class="text-green-400 text-sm">
-                                    # Clone the repository<br>
-                                    git clone https://github.com/dennokorir/plumer.git<br><br>
-                                    # Make plumer executable<br>
+                                    # Navigate to your Flutter project<br>
+                                    cd your_flutter_project<br><br>
+                                    # Download Plumer<br>
+                                    wget https://raw.githubusercontent.com/denisdevke/plumer/main/plumer -O plumer<br><br>
+                                    # Make it executable<br>
                                     chmod +x plumer<br><br>
-                                    # Add to PATH (optional)<br>
-                                    sudo cp plumer /usr/local/bin/
+                                    # Optional: Add alias for global access<br>
+                                    alias plumer="dart $(pwd)/plumer"
                                 </code>
                             </div>
                         </div>
@@ -322,14 +326,13 @@
                             <h3 class="ml-4 text-xl font-semibold text-gray-900">Initialize Your Project</h3>
                         </div>
                         <div class="ml-14 mt-2">
-                            <p class="text-gray-600 mb-4">Navigate to your Flutter project and run the init command:</p>
+                            <p class="text-gray-600 mb-4">Initialize your Flutter project with GetX, Dio, and folder structure:</p>
                             <div class="code-block">
                                 <code class="text-green-400 text-sm">
-                                    cd your-flutter-project<br>
-                                    plumer init
+                                    ././plumer init
                                 </code>
                             </div>
-                            <p class="text-gray-600 mt-4">This will set up the project structure, install GetX and Dio, and create beautiful themes!</p>
+                            <p class="text-gray-600 mt-4">This will set up the project structure, install GetX and Dio, auto-generate recommended folder structure, and create beautiful themes!</p>
                         </div>
                     </div>
 
@@ -346,14 +349,14 @@
                             <div class="code-block">
                                 <code class="text-green-400 text-sm">
                                     # Create a complete page with controller, binding, and screen<br>
-                                    plumer make:page User/Profile<br><br>
+                                    ././plumer make:page User/Profile<br><br>
                                     # Or create individual components<br>
-                                    plumer make:controller Auth/Login<br>
-                                    plumer make:screen Settings/Theme<br>
-                                    plumer make:service Api/User<br><br>
+                                    ././plumer make:controller Auth/Login<br>
+                                    ././plumer make:screen Settings/Theme<br>
+                                    ././plumer make:service Api/User<br><br>
                                     # Install ready-made widgets<br>
-                                    plumer install:widget slider<br>
-                                    plumer install:widget button lib/components
+                                    ././plumer install:widget slider<br>
+                                    ././plumer install:widget button lib/components
                                 </code>
                             </div>
                         </div>
@@ -381,7 +384,7 @@
                     <div class="grid gap-6 md:grid-cols-2">
                         <!-- Init Command -->
                         <div class="bg-gray-50 rounded-lg p-6">
-                            <h4 class="text-lg font-semibold text-gray-900 mb-2">plumer init</h4>
+                            <h4 class="text-lg font-semibold text-gray-900 mb-2">./plumer init</h4>
                             <p class="text-gray-600 mb-3">Initializes your Flutter project with GetX, Dio, and beautiful theming support.</p>
                             <div class="text-sm text-gray-500">
                                 <strong>Creates:</strong> Folder structure, themes, routes, and a welcome screen
@@ -390,58 +393,58 @@
 
                         <!-- Make Page Command -->
                         <div class="bg-gray-50 rounded-lg p-6">
-                            <h4 class="text-lg font-semibold text-gray-900 mb-2">plumer make:page [path]</h4>
+                            <h4 class="text-lg font-semibold text-gray-900 mb-2">./plumer make:page [path]</h4>
                             <p class="text-gray-600 mb-3">Creates a complete page with controller, binding, screen, and route registration.</p>
                             <div class="text-sm text-gray-500">
-                                <strong>Example:</strong> <code class="bg-white px-2 py-1 rounded">plumer make:page User/Profile</code>
+                                <strong>Example:</strong> <code class="bg-white px-2 py-1 rounded">./plumer make:page User/Profile</code>
                             </div>
                         </div>
 
                         <!-- Make Controller Command -->
                         <div class="bg-gray-50 rounded-lg p-6">
-                            <h4 class="text-lg font-semibold text-gray-900 mb-2">plumer make:controller [path]</h4>
+                            <h4 class="text-lg font-semibold text-gray-900 mb-2">./plumer make:controller [path]</h4>
                             <p class="text-gray-600 mb-3">Generates a GetX controller class for state management.</p>
                             <div class="text-sm text-gray-500">
-                                <strong>Example:</strong> <code class="bg-white px-2 py-1 rounded">plumer make:controller Auth/Login</code>
+                                <strong>Example:</strong> <code class="bg-white px-2 py-1 rounded">./plumer make:controller Auth/Login</code>
                             </div>
                         </div>
 
                         <!-- Make Binding Command -->
                         <div class="bg-gray-50 rounded-lg p-6">
-                            <h4 class="text-lg font-semibold text-gray-900 mb-2">plumer make:binding [path]</h4>
+                            <h4 class="text-lg font-semibold text-gray-900 mb-2">./plumer make:binding [path]</h4>
                             <p class="text-gray-600 mb-3">Creates a GetX binding class for dependency injection.</p>
                             <div class="text-sm text-gray-500">
-                                <strong>Example:</strong> <code class="bg-white px-2 py-1 rounded">plumer make:binding Settings/Theme</code>
+                                <strong>Example:</strong> <code class="bg-white px-2 py-1 rounded">./plumer make:binding Settings/Theme</code>
                             </div>
                         </div>
 
                         <!-- Make Screen Command -->
                         <div class="bg-gray-50 rounded-lg p-6">
-                            <h4 class="text-lg font-semibold text-gray-900 mb-2">plumer make:screen [path]</h4>
+                            <h4 class="text-lg font-semibold text-gray-900 mb-2">./plumer make:screen [path]</h4>
                             <p class="text-gray-600 mb-3">Generates a Flutter screen/page widget with themed UI components.</p>
                             <div class="text-sm text-gray-500">
-                                <strong>Example:</strong> <code class="bg-white px-2 py-1 rounded">plumer make:screen Dashboard/Analytics</code>
+                                <strong>Example:</strong> <code class="bg-white px-2 py-1 rounded">./plumer make:screen Dashboard/Analytics</code>
                             </div>
                         </div>
 
                         <!-- Make Service Command -->
                         <div class="bg-green-50 rounded-lg p-6 border border-green-200">
-                            <h4 class="text-lg font-semibold text-green-900 mb-2">🆕 plumer make:service [path]</h4>
+                            <h4 class="text-lg font-semibold text-green-900 mb-2">🆕 ./plumer make:service [path]</h4>
                             <p class="text-green-800 mb-3">Creates a complete API service with Dio integration, authentication, error handling, and logging.</p>
                             <div class="text-sm text-green-700">
-                                <strong>Example:</strong> <code class="bg-white px-2 py-1 rounded">plumer make:service Api/User</code><br>
+                                <strong>Example:</strong> <code class="bg-white px-2 py-1 rounded">./plumer make:service Api/User</code><br>
                                 <em>Creates CRUD operations, file uploads, and search functionality automatically</em>
                             </div>
                         </div>
 
                         <!-- Install Widget Command -->
                         <div class="bg-indigo-50 rounded-lg p-6 border border-indigo-200">
-                            <h4 class="text-lg font-semibold text-indigo-900 mb-2">🆕 plumer install:widget [name] [folder?]</h4>
+                            <h4 class="text-lg font-semibold text-indigo-900 mb-2">🆕 ./plumer install:widget [name] [folder?]</h4>
                             <p class="text-indigo-800 mb-3">Downloads and installs ready-made widgets from the Plumer widget repository.</p>
                             <div class="text-sm text-indigo-700">
                                 <strong>Examples:</strong><br>
-                                <code class="bg-white px-2 py-1 rounded mr-2">plumer install:widget slider</code><br>
-                                <code class="bg-white px-2 py-1 rounded">plumer install:widget button lib/components</code>
+                                <code class="bg-white px-2 py-1 rounded mr-2">./plumer install:widget slider</code><br>
+                                <code class="bg-white px-2 py-1 rounded">./plumer install:widget button lib/components</code>
                             </div>
                         </div>
 
@@ -459,11 +462,193 @@
         </div>
     </section>
 
+    <!-- Service Usage Examples Section -->
+    <section class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-12">
+                <h2 class="text-base text-plumer-600 font-semibold tracking-wide uppercase">Service Usage</h2>
+                <p class="mt-2 text-3xl leading-8 font-bold tracking-tight text-gray-900 sm:text-4xl">
+                    How to Use Generated Services
+                </p>
+                <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+                    Complete examples showing how to integrate and use API services in your controllers and screens.
+                </p>
+            </div>
+
+            <div class="grid gap-8 lg:grid-cols-2">
+                <!-- Service Generation -->
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">1. Generate a Service</h3>
+                    <div class="code-block mb-4">
+                        <code class="text-green-400 text-sm">
+                            # Generate User service<br>
+                            ./plumer make:service Api/User
+                        </code>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Creates:</p>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• <code class="bg-white px-2 py-1 rounded text-xs">lib/services/api/user_service.dart</code></li>
+                        <li>• Complete CRUD operations</li>
+                        <li>• File upload functionality</li>
+                        <li>• Search capabilities</li>
+                        <li>• Error handling & logging</li>
+                    </ul>
+                </div>
+
+                <!-- Service Registration -->
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">2. Register Service</h3>
+                    <p class="text-sm text-gray-600 mb-3">Add to your main.dart or binding:</p>
+                    <div class="code-block">
+                        <code class="text-green-400 text-sm">
+                            // In main.dart or initial binding<br>
+                            Get.put(UserService());<br><br>
+                            // Or lazy initialization<br>
+                            Get.lazyPut(() => UserService());
+                        </code>
+                    </div>
+                </div>
+
+                <!-- Controller Usage -->
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">3. Use in Controller</h3>
+                    <div class="code-block">
+                        <code class="text-green-400 text-sm">
+                            class UserController extends GetxController {<br>
+                            &nbsp;&nbsp;final UserService _userService = Get.find();<br>
+                            &nbsp;&nbsp;var users = <User>[].obs;<br>
+                            &nbsp;&nbsp;var isLoading = false.obs;<br><br>
+                            &nbsp;&nbsp;Future&lt;void&gt; loadUsers() async {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;try {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;isLoading.value = true;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;final response = await _userService.getUserList();<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;users.value = (response.data['data'] as List)<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.map((user) => User.fromJson(user))<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.toList();<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;} catch (e) {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get.snackbar('Error', 'Failed to load users');<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;} finally {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;isLoading.value = false;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                            &nbsp;&nbsp;}<br>
+                            }
+                        </code>
+                    </div>
+                </div>
+
+                <!-- Available Methods -->
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">4. Available Methods</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-white rounded p-3">
+                            <code class="text-blue-600 font-semibold">getUserList()</code>
+                            <p class="text-gray-600 mt-1">Get paginated list with filters</p>
+                        </div>
+                        <div class="bg-white rounded p-3">
+                            <code class="text-blue-600 font-semibold">getUserById(id)</code>
+                            <p class="text-gray-600 mt-1">Get single user by ID</p>
+                        </div>
+                        <div class="bg-white rounded p-3">
+                            <code class="text-blue-600 font-semibold">createUser(data)</code>
+                            <p class="text-gray-600 mt-1">Create new user</p>
+                        </div>
+                        <div class="bg-white rounded p-3">
+                            <code class="text-blue-600 font-semibold">updateUser(id, data)</code>
+                            <p class="text-gray-600 mt-1">Update existing user</p>
+                        </div>
+                        <div class="bg-white rounded p-3">
+                            <code class="text-blue-600 font-semibold">deleteUser(id)</code>
+                            <p class="text-gray-600 mt-1">Delete user by ID</p>
+                        </div>
+                        <div class="bg-white rounded p-3">
+                            <code class="text-blue-600 font-semibold">uploadUserFile(id, path)</code>
+                            <p class="text-gray-600 mt-1">Upload file for user</p>
+                        </div>
+                        <div class="bg-white rounded p-3">
+                            <code class="text-blue-600 font-semibold">searchUsers(query)</code>
+                            <p class="text-gray-600 mt-1">Search users by query</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CRUD Example -->
+                <div class="bg-gray-50 rounded-lg p-6 lg:col-span-2">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">5. Complete CRUD Example</h3>
+                    <div class="code-block">
+                        <code class="text-green-400 text-sm">
+                            class UserController extends GetxController {<br>
+                            &nbsp;&nbsp;final UserService _userService = Get.find();<br><br>
+                            &nbsp;&nbsp;// Create user<br>
+                            &nbsp;&nbsp;Future&lt;void&gt; createUser(Map&lt;String, dynamic&gt; userData) async {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;try {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;final response = await _userService.createUser(userData);<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get.snackbar('Success', 'User created successfully');<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;loadUsers(); // Refresh list<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;} catch (e) {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get.snackbar('Error', 'Failed to create user');<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                            &nbsp;&nbsp;}<br><br>
+                            &nbsp;&nbsp;// Search users<br>
+                            &nbsp;&nbsp;Future&lt;void&gt; searchUsers(String query) async {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;try {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;final response = await _userService.searchUsers(query);<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;users.value = (response.data['data'] as List)<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.map((user) => User.fromJson(user))<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.toList();<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;} catch (e) {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get.snackbar('Error', 'Search failed');<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                            &nbsp;&nbsp;}<br><br>
+                            &nbsp;&nbsp;// Upload user avatar<br>
+                            &nbsp;&nbsp;Future&lt;void&gt; uploadAvatar(String userId, String filePath) async {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;try {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;await _userService.uploadUserFile(userId, filePath);<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get.snackbar('Success', 'Avatar uploaded successfully');<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;} catch (e) {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get.snackbar('Error', 'Upload failed');<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                            &nbsp;&nbsp;}<br>
+                            }
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 bg-blue-50 rounded-lg p-6 border border-blue-200">
+                <h3 class="text-lg font-semibold text-blue-900 mb-3">🎯 Pro Tips</h3>
+                <ul class="space-y-2 text-sm text-blue-800">
+                    <li>• Services automatically handle authentication, logging, and error handling</li>
+                    <li>• All responses use Dio's Response type for consistent data access</li>
+                    <li>• Built-in request/response logging helps with debugging</li>
+                    <li>• File uploads use multipart form data with proper error handling</li>
+                    <li>• Services extend BaseApiService for consistent configuration</li>
+                    <li>• Use GetX dependency injection for clean service management</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Support Section -->
+    <section class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Support Development</h2>
+            <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                If Plumer saves you time and boosts your Flutter development productivity, consider supporting its continued development.
+            </p>
+            <a href="https://coff.ee/denisdevke" target="_blank" class="inline-block hover:transform hover:scale-105 transition-transform duration-200">
+                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" width="200" alt="Buy Me A Coffee" class="mx-auto">
+            </a>
+            <p class="text-sm text-gray-500 mt-4">
+                Your support helps maintain and improve Plumer with new features and updates.
+            </p>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="bg-gray-900">
         <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
             <div class="flex justify-center space-x-6 md:order-2">
-                <a href="https://github.com/dennokorir/plumer" class="text-gray-400 hover:text-gray-300">
+                <a href="https://github.com/denisdevke/plumer" class="text-gray-400 hover:text-gray-300">
                     <span class="sr-only">GitHub</span>
                     <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
                         <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />

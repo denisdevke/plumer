@@ -1,7 +1,7 @@
 # GitHub Pages configuration for Plumer CLI Documentation
 title: "Plumer CLI"
 description: "Flutter scaffolding made easy - A powerful CLI tool inspired by Laravel Artisan"
-url: "https://dennokorir.github.io"
+url: "https://denisdevke.github.io"
 baseurl: "/plumer"
 
 # Build settings
@@ -28,8 +28,8 @@ include:
 # SEO settings
 lang: en
 author: "Denno Korir"
-twitter_username: dennokorir
-github_username: dennokorir
+twitter_username: denisdevke
+github_username: denisdevke
 
 # Social media and analytics (configure as needed)
 google_analytics: # Add your Google Analytics ID here

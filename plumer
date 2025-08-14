@@ -450,7 +450,7 @@ Future<void> _installWidget(String widgetName, String? customPath) async {
   }
   
   // Construct the GitHub raw file URL
-  final githubUrl = 'https://raw.githubusercontent.com/dennokorir/plumer/main/widgets/$widgetName.dart';
+  final githubUrl = 'https://raw.githubusercontent.com/denisdevke/plumer/main/widgets/$widgetName.dart';
   final targetFile = File('$targetFolder/$widgetName.dart');
   
   // Check if file already exists
@@ -482,7 +482,7 @@ Future<void> _installWidget(String widgetName, String? customPath) async {
       if (!widgetContent.contains('class') || widgetContent.contains('404: Not Found')) {
         print('\x1B[31m❌ Widget "$widgetName" not found in the repository.\x1B[0m');
         print('Available widgets: slider, button, card, input, dialog');
-        print('Or check: https://github.com/dennokorir/plumer/tree/main/widgets');
+        print('Or check: https://github.com/denisdevke/plumer/tree/main/widgets');
         return;
       }
       
@@ -534,8 +534,8 @@ Future<void> _createService(String folder, String pascal, String snake, String p
   final baseServiceImport = 'package:$packageName/services/base_api_service.dart';
   
   await file.writeAsString('''
-import 'package:dio/dio.dart';
-import 'package:get/get.dart';
+import 'package:dio/dio.dart' show Dio, FormData, MultipartFile, Response as DioResponse;
+import 'package:get/get.dart' hide Response;
 import '$importPath';
 import '$baseServiceImport';
 
@@ -550,7 +550,7 @@ class ${pascal}Service extends BaseApiService {
   static const String _baseEndpoint = '/${snake}';
   
   /// Get list of ${snake}s
-  Future<Response> get${pascal}List({
+  Future<DioResponse> get${pascal}List({
     int? page,
     int? limit,
     Map<String, dynamic>? filters,
@@ -579,7 +579,7 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Get ${snake} by ID
-  Future<Response> get${pascal}ById(String id) async {
+  Future<DioResponse> get${pascal}ById(String id) async {
     try {
       logInfo('Fetching ${snake} with ID: \$id');
       
@@ -597,7 +597,7 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Create new ${snake}
-  Future<Response> create${pascal}(Map<String, dynamic> data) async {
+  Future<DioResponse> create${pascal}(Map<String, dynamic> data) async {
     try {
       logInfo('Creating new ${snake}', data: data);
       
@@ -616,7 +616,7 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Update ${snake} by ID
-  Future<Response> update${pascal}(String id, Map<String, dynamic> data) async {
+  Future<DioResponse> update${pascal}(String id, Map<String, dynamic> data) async {
     try {
       logInfo('Updating ${snake} with ID: \$id', data: data);
       
@@ -635,7 +635,7 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Delete ${snake} by ID
-  Future<Response> delete${pascal}(String id) async {
+  Future<DioResponse> delete${pascal}(String id) async {
     try {
       logInfo('Deleting ${snake} with ID: \$id');
       
@@ -653,7 +653,7 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Upload file for ${snake}
-  Future<Response> upload${pascal}File(String id, String filePath) async {
+  Future<DioResponse> upload${pascal}File(String id, String filePath) async {
     try {
       logInfo('Uploading file for ${snake} with ID: \$id');
       
@@ -677,7 +677,7 @@ class ${pascal}Service extends BaseApiService {
   }
   
   /// Search ${snake}s
-  Future<Response> search${pascal}s(String query, {
+  Future<DioResponse> search${pascal}s(String query, {
     int? page,
     int? limit,
   }) async {
@@ -1066,7 +1066,7 @@ void _showHelp() {
   print('  plumer install:widget slider');
   print('  plumer install:widget button lib/components');
   print('');
-  print('\x1B[33mFor more information, visit:\x1B[0m https://github.com/dennokorir/plumer');
+  print('\x1B[33mFor more information, visit:\x1B[0m https://github.com/denisdevke/plumer');
 }
 
 Future<bool> _isFlutterProject() async {
