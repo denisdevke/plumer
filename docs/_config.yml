@@ -1,0 +1,41 @@
+# GitHub Pages configuration for Plumer CLI Documentation
+title: "Plumer CLI"
+description: "Flutter scaffolding made easy - A powerful CLI tool inspired by Laravel Artisan"
+url: "https://dennokorir.github.io"
+baseurl: "/plumer"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# Exclude files from processing
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .sass-cache
+  - .jekyll-cache
+
+# Include files that start with underscore
+include:
+  - _redirects
+
+# SEO settings
+lang: en
+author: "Denno Korir"
+twitter_username: dennokorir
+github_username: dennokorir
+
+# Social media and analytics (configure as needed)
+google_analytics: # Add your Google Analytics ID here
+twitter:
+  card: summary_large_image
+
+# Site logo and favicon
+logo: /assets/images/logo.png
+favicon: /assets/images/favicon.ico

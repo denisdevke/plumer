@@ -78,15 +78,38 @@ Future<void> _initProject() async {
   }
   print('\x1B[32m✅ Created recommended folder structure.\x1B[0m');
 
-  // Create app_colors.dart
+  // Create app_colors.dart with theme support
   final appColorsContent = '''
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color primary = Color(0xFF340404); // Deep red
-  static const Color accent = Color(0xFFF5B300); // Vibrant yellow
+  // Light Theme Colors
+  static const Color lightPrimary = Color(0xFF6366F1); // Modern indigo
+  static const Color lightSecondary = Color(0xFF8B5CF6); // Purple
+  static const Color lightAccent = Color(0xFF10B981); // Emerald
+  static const Color lightBackground = Color(0xFFFAFAFA);
+  static const Color lightSurface = Colors.white;
+  static const Color lightOnPrimary = Colors.white;
+  static const Color lightOnSecondary = Colors.white;
+  static const Color lightOnBackground = Color(0xFF1F2937);
+  static const Color lightOnSurface = Color(0xFF1F2937);
+  
+  // Dark Theme Colors
+  static const Color darkPrimary = Color(0xFF818CF8); // Light indigo
+  static const Color darkSecondary = Color(0xFFA78BFA); // Light purple  
+  static const Color darkAccent = Color(0xFF34D399); // Light emerald
+  static const Color darkBackground = Color(0xFF0F172A); // Dark slate
+  static const Color darkSurface = Color(0xFF1E293B); // Medium slate
+  static const Color darkOnPrimary = Color(0xFF0F172A);
+  static const Color darkOnSecondary = Color(0xFF0F172A);
+  static const Color darkOnBackground = Color(0xFFF8FAFC);
+  static const Color darkOnSurface = Color(0xFFF8FAFC);
+
+  // Legacy colors for backward compatibility
+  static const Color primary = lightPrimary;
+  static const Color accent = lightAccent;
   static const Color appBarColor = Colors.white;
-  static const Color appBarBackground = primary;
+  static const Color appBarBackground = lightPrimary;
 }
 ''';
   await File('lib/config/app_colors.dart').writeAsString(appColorsContent);
@@ -103,27 +126,242 @@ class AppRoutes {
   await File('lib/config/app_routes.dart').writeAsString(appRoutesContent);
   print('\x1B[32m✅ Created lib/config/app_routes.dart\x1B[0m');
 
+  // Create app_theme.dart
+  final appThemeContent = '''
+import 'package:flutter/material.dart';
+import 'app_colors.dart';
+
+class AppTheme {
+  static ThemeData get lightTheme {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+      primarySwatch: _createMaterialColor(AppColors.lightPrimary),
+      primaryColor: AppColors.lightPrimary,
+      colorScheme: const ColorScheme.light(
+        primary: AppColors.lightPrimary,
+        secondary: AppColors.lightSecondary,
+        tertiary: AppColors.lightAccent,
+        background: AppColors.lightBackground,
+        surface: AppColors.lightSurface,
+        onPrimary: AppColors.lightOnPrimary,
+        onSecondary: AppColors.lightOnSecondary,
+        onBackground: AppColors.lightOnBackground,
+        onSurface: AppColors.lightOnSurface,
+      ),
+      scaffoldBackgroundColor: AppColors.lightBackground,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppColors.lightPrimary,
+        foregroundColor: AppColors.lightOnPrimary,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      cardTheme: const CardTheme(
+        color: AppColors.lightSurface,
+        elevation: 2,
+        margin: EdgeInsets.all(8),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.lightPrimary,
+          foregroundColor: AppColors.lightOnPrimary,
+          elevation: 2,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppColors.lightPrimary),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppColors.lightPrimary, width: 2),
+        ),
+      ),
+      fontFamily: 'Roboto',
+    );
+  }
+
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      primarySwatch: _createMaterialColor(AppColors.darkPrimary),
+      primaryColor: AppColors.darkPrimary,
+      colorScheme: const ColorScheme.dark(
+        primary: AppColors.darkPrimary,
+        secondary: AppColors.darkSecondary,
+        tertiary: AppColors.darkAccent,
+        background: AppColors.darkBackground,
+        surface: AppColors.darkSurface,
+        onPrimary: AppColors.darkOnPrimary,
+        onSecondary: AppColors.darkOnSecondary,
+        onBackground: AppColors.darkOnBackground,
+        onSurface: AppColors.darkOnSurface,
+      ),
+      scaffoldBackgroundColor: AppColors.darkBackground,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppColors.darkSurface,
+        foregroundColor: AppColors.darkOnSurface,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      cardTheme: const CardTheme(
+        color: AppColors.darkSurface,
+        elevation: 4,
+        margin: EdgeInsets.all(8),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.darkPrimary,
+          foregroundColor: AppColors.darkOnPrimary,
+          elevation: 2,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppColors.darkPrimary),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppColors.darkPrimary, width: 2),
+        ),
+      ),
+      fontFamily: 'Roboto',
+    );
+  }
+
+  static MaterialColor _createMaterialColor(Color color) {
+    List strengths = <double>[.05];
+    final swatch = <int, Color>{};
+    final int r = color.red, g = color.green, b = color.blue;
+
+    for (int i = 1; i < 10; i++) {
+      strengths.add(0.1 * i);
+    }
+
+    for (var strength in strengths) {
+      final double ds = 0.5 - strength;
+      swatch[(strength * 1000).round()] = Color.fromRGBO(
+        r + ((ds < 0 ? r : (255 - r)) * ds).round(),
+        g + ((ds < 0 ? g : (255 - g)) * ds).round(),
+        b + ((ds < 0 ? b : (255 - b)) * ds).round(),
+        1,
+      );
+    }
+
+    return MaterialColor(color.value, swatch);
+  }
+}
+''';
+  await File('lib/config/app_theme.dart').writeAsString(appThemeContent);
+  print('\x1B[32m✅ Created lib/config/app_theme.dart\x1B[0m');
+
   // Create MainPage
   final mainPageContent = '''
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../config/app_colors.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Welcome to Plumer'),
-        backgroundColor: AppColors.appBarBackground,
-        foregroundColor: AppColors.appBarColor,
+        actions: [
+          IconButton(
+            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+            onPressed: () {
+              Get.changeThemeMode(
+                isDark ? ThemeMode.light : ThemeMode.dark,
+              );
+            },
+            tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+          ),
+        ],
       ),
-      body: const Center(
-        child: Text(
-          'Plumer initialized your Flutter project!',
-          style: TextStyle(fontSize: 18),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.flutter_dash,
+              size: 80,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Plumer CLI',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Your Flutter project has been initialized successfully!',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Theme.of(context).colorScheme.onBackground,
+              ),
+            ),
+            const SizedBox(height: 32),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.palette,
+                      size: 40,
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Theme Support',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Your app now supports both light and dark themes. Toggle between them using the button in the app bar!',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () {
+                Get.snackbar(
+                  'Welcome!',
+                  'Start building your amazing Flutter app with Plumer CLI',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  colorText: Theme.of(context).colorScheme.onPrimary,
+                );
+              },
+              icon: const Icon(Icons.rocket_launch),
+              label: const Text('Get Started'),
+            ),
+          ],
         ),
       ),
     );
@@ -136,8 +374,9 @@ class MainPage extends StatelessWidget {
   // Replace main.dart
   final mainDartContent = '''
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'config/app_colors.dart';
+import 'config/app_theme.dart';
 import 'config/app_routes.dart';
 import 'screens/main_page.dart';
 
@@ -153,11 +392,9 @@ class PlumerApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Plumer App',
-      theme: ThemeData(
-        primaryColor: AppColors.primary,
-        scaffoldBackgroundColor: Colors.white,
-        fontFamily: 'Roboto',
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system, // Automatically switches based on system preference
       initialRoute: '/',
       getPages: [
         GetPage(name: '/', page: () => const MainPage()),
